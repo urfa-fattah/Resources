@@ -256,6 +256,28 @@ mark{background:var(--brass-soft);color:var(--navy-deep);border-radius:2px;paddi
 .lightbox img{max-width:92vw;max-height:78vh;border-radius:4px;box-shadow:0 20px 60px rgba(0,0,0,0.5);}
 .lightbox .cap{color:#F4EFDD;font-family:var(--mono);font-size:0.8rem;}
 
+/* ---------- howto modal ---------- */
+.howto-overlay{position:fixed;inset:0;background:rgba(18,26,31,0.6);backdrop-filter:blur(2px);z-index:210;display:none;align-items:center;justify-content:center;padding:24px;}
+.howto-overlay.open{display:flex;animation:fadeIn .18s ease;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.howto-card{background:var(--card);border:1px solid var(--line-strong);border-radius:var(--r);box-shadow:0 24px 70px -20px rgba(18,26,31,0.55);max-width:520px;width:100%;max-height:86vh;overflow-y:auto;padding:22px 24px 26px;}
+.howto-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.howto-card h3{font-family:var(--disp);font-size:1.3rem;font-weight:700;margin-bottom:14px;}
+.howto-steps{padding-left:20px;display:flex;flex-direction:column;gap:12px;font-size:0.88rem;color:var(--ink-soft);}
+.howto-steps li::marker{font-family:var(--mono);color:var(--brass);}
+.howto-steps b{color:var(--ink);}
+.howto-steps code{font-family:var(--mono);font-size:0.78rem;background:var(--paper-deep);padding:1px 5px;border-radius:3px;color:var(--navy);}
+.howto-steps pre{font-family:var(--mono);font-size:0.74rem;background:var(--navy-deep);color:#dce8ec;padding:12px 14px;border-radius:4px;margin-top:8px;overflow-x:auto;line-height:1.6;}
+.howto-note{margin-top:16px;padding-top:14px;border-top:1px dotted var(--line);font-size:0.8rem;color:var(--ink-faint);}
+
+/* ---------- resource card progress ---------- */
+.rescard .progress{margin-top:10px;padding-left:8px;display:flex;align-items:center;gap:6px;}
+.rescard .progress .bar{flex:1;height:4px;border-radius:999px;background:rgba(38,34,26,0.1);overflow:hidden;}
+.rescard .progress .bar i{display:block;height:100%;background:var(--green);border-radius:999px;}
+.rescard .progress span{font-family:var(--mono);font-size:0.62rem;color:var(--ink-faint);flex:none;}
+.connect-status.syncing .dot{background:var(--brass);animation:pulse 1s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.35;}}
+
 /* toast */
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy-deep);color:#F4EFDD;padding:11px 20px;border-radius:6px;font-size:0.84rem;z-index:300;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;font-family:var(--body);box-shadow:0 10px 30px rgba(0,0,0,0.3);}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
@@ -292,18 +314,17 @@ mark{background:var(--brass-soft);color:var(--navy-deep);border-radius:2px;paddi
       <div>
         <span class="eyebrow">Personal academic archive</span>
         <h1>Every handout, note<br>and past paper — <i>catalogued.</i></h1>
-        <p class="lede">Connect the folder where you keep your PDFs and files. The Reading Room reads each filename, files it under the matching Year‑1 course automatically, and opens it in a built‑in reader — no uploading, nothing leaves your device.</p>
+        <p class="lede">Drop files straight into the <code style="font-family:var(--mono)">/resources</code> folder beside this page, name them like <code style="font-family:var(--mono)">CSE-1101-lecture-1.pdf</code>, and list the filename in <code style="font-family:var(--mono)">manifest.json</code>. The Reading Room reads the first token of each name, files it under the matching Year‑1 course automatically, and opens it in a built‑in reader — nothing is uploaded, everything is read straight off disk.</p>
       </div>
       <div class="hero-stats" id="heroStats"></div>
     </div>
     <div class="connect-row">
       <button class="btn primary" id="connectBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
-        Connect resource folder
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 0 0 4.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 0 1-15.357-2m15.357 2H15"/></svg>
+        Refresh library
       </button>
-      <button class="btn" id="reconnectBtn" style="display:none;">Reconnect previous folder</button>
-      <input type="file" id="fallbackInput" webkitdirectory directory multiple style="display:none;">
-      <span class="connect-status" id="connectStatus"><span class="dot"></span>No folder connected yet</span>
+      <button class="btn" id="howtoBtn" type="button">How to add resources</button>
+      <span class="connect-status" id="connectStatus"><span class="dot"></span>Reading manifest…</span>
     </div>
   </div>
 </header>
@@ -436,6 +457,31 @@ mark{background:var(--brass-soft);color:var(--navy-deep);border-radius:2px;paddi
   <img id="lbImg" src="" alt="">
   <div class="cap" id="lbCap"></div>
   <button class="btn" id="lbClose">Close</button>
+</div>
+
+<!-- HOW-TO MODAL -->
+<div class="howto-overlay" id="howtoOverlay">
+  <div class="howto-card">
+    <div class="howto-head">
+      <span class="stamp">Accession guide</span>
+      <button class="rbtn" id="howtoClose" aria-label="Close" style="color:var(--ink);border-color:var(--line-strong);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <h3>Filing a new resource</h3>
+    <ol class="howto-steps">
+      <li><b>Drop the file</b> into the <code>/resources</code> folder that sits next to <code>index.html</code>.</li>
+      <li><b>Name it course‑first</b>, e.g. <code>CSE-1101-lecture-3-boolean-algebra.pdf</code> — the part before the first dash or space is what gets matched to a course.</li>
+      <li><b>List the filename</b> in <code>resources/manifest.json</code> — it's a plain array of strings:
+        <pre>[
+  "CSE-1101-lecture-3-boolean-algebra.pdf",
+  "CSE-1102-lab-sheet-2.pdf",
+  "MATH-1101-past-paper-2024.pdf"
+]</pre>
+      </li>
+      <li><b>Click "Refresh library"</b> (or reload the page) — the file appears filed under its course automatically.</li>
+    </ol>
+    <p class="howto-note">Unrecognised prefixes land in <b>Unfiled</b> instead of being dropped — nothing is ever hidden.</p>
+    <p class="howto-note">Opening <code>index.html</code> by double‑clicking it won't work — browsers block local file reads that way. Serve the folder with <code>python -m http.server</code> (or any static host) and open it over <code>http://</code> instead.</p>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -656,99 +702,83 @@ function fmtSize(b){ if(!b) return ''; const u=['B','KB','MB','GB']; let i=0; wh
 /* ============================================================
    STATE
    ============================================================ */
-let resources = [];      // {name, file, ext, size, course, rawTag, accession, connectedAt}
+let resources = [];      // {name, url, ext, size, lastModified, course, rawTag, accession}
 let currentFilter = 'all';
 let currentSort = 'recent';
-let dirHandle = null;
 
-/* ---------- IndexedDB for handle persistence ---------- */
-function idbOpen(){
-  return new Promise((res,rej)=>{
-    const req = indexedDB.open('reading-room', 1);
-    req.onupgradeneeded = ()=>{ req.result.createObjectStore('handles'); };
-    req.onsuccess = ()=>res(req.result);
-    req.onerror = ()=>rej(req.error);
-  });
-}
-async function idbSet(key,val){ try{ const db=await idbOpen(); return new Promise((res)=>{ const tx=db.transaction('handles','readwrite'); tx.objectStore('handles').put(val,key); tx.oncomplete=()=>res(); tx.onerror=()=>res(); }); }catch(e){} }
-async function idbGet(key){ try{ const db=await idbOpen(); return new Promise((res)=>{ const tx=db.transaction('handles','readonly'); const rq=tx.objectStore('handles').get(key); rq.onsuccess=()=>res(rq.result); rq.onerror=()=>res(null); }); }catch(e){ return null; } }
+/* ============================================================
+   MANIFEST-DRIVEN LOADER
+   Resources live as plain files under /resources next to this
+   page. resources/manifest.json is a JSON array of filenames.
+   Nothing is uploaded — pdf.js streams pages straight off disk
+   (or off whatever static server is hosting this folder).
+   ============================================================ */
+const RESOURCES_DIR = 'resources/';
+const MANIFEST_URL = RESOURCES_DIR + 'manifest.json';
 
-const supportsFS = 'showDirectoryPicker' in window;
-
-async function connectFolder(){
-  if(supportsFS){
-    try{
-      const handle = await window.showDirectoryPicker();
-      dirHandle = handle;
-      await idbSet('lastDir', handle);
-      await scanHandle(handle);
-      showToast('Folder connected — resources filed.');
-    }catch(e){ if(e.name!=='AbortError') showToast('Could not open folder.'); }
-  } else {
-    document.getElementById('fallbackInput').click();
-  }
-}
-
-async function scanHandle(handle){
-  const items = [];
-  for await (const [name, entry] of handle.entries()){
-    if(entry.kind==='file' && /\.(pdf|docx?|pptx?|xlsx?|png|jpe?g|gif|txt|zip)$/i.test(name)){
-      const file = await entry.getFile();
-      items.push(buildRecord(name, file, entry));
-    }
-  }
-  resources = items;
-  document.getElementById('connectStatus').innerHTML = '<span class="dot"></span>'+resources.length+' file(s) connected';
-  document.getElementById('connectStatus').classList.add('ok');
-  document.getElementById('connectBtn').textContent = 'Reconnect / choose another folder';
-  document.getElementById('connectBtn').prepend(iconFolder());
-  renderAll();
-}
-
-function iconFolder(){
-  const span=document.createElement('span'); return span; // placeholder, kept simple
-}
-
-function buildRecord(name, file, handle){
+function buildRecord(name, meta){
   const {course, rawTag} = matchCourse(name);
   const ext = extOf(name);
   return {
-    name, file, handle: handle||null, ext,
-    size: file.size, lastModified: file.lastModified,
+    name,
+    url: RESOURCES_DIR + name.split('/').map(encodeURIComponent).join('/'),
+    ext,
+    size: meta && meta.size || 0,
+    lastModified: meta && meta.lastModified || Date.now(),
     course, rawTag,
     accession: (course? course.code : normalizeToken(rawTag).slice(0,8)) + '·' + String(Math.abs(hashCode(name))).slice(0,3)
   };
 }
 function hashCode(s){ let h=0; for(let i=0;i<s.length;i++){ h=(h<<5)-h+s.charCodeAt(i); h|=0; } return h; }
 
-document.getElementById('fallbackInput').addEventListener('change', (e)=>{
-  const files = Array.from(e.target.files||[]);
-  if(!files.length) return;
-  resources = files.map(f=> buildRecord(f.webkitRelativePath ? f.webkitRelativePath.split('/').pop() : f.name, f, null));
-  document.getElementById('connectStatus').innerHTML = '<span class="dot"></span>'+resources.length+' file(s) connected';
-  document.getElementById('connectStatus').classList.add('ok');
-  document.getElementById('connectBtn').textContent = 'Choose another folder';
-  showToast('Folder connected — resources filed.');
-  renderAll();
-});
+// Best-effort HEAD request to pick up file size / last-modified for display.
+// Falls back gracefully — the reader itself doesn't depend on this.
+async function probeFile(rec){
+  try{
+    const res = await fetch(rec.url, {method:'HEAD'});
+    if(!res.ok) return rec;
+    const len = res.headers.get('content-length');
+    const mod = res.headers.get('last-modified');
+    if(len) rec.size = parseInt(len,10);
+    if(mod) rec.lastModified = new Date(mod).getTime();
+  }catch(e){ /* server may not support HEAD — ignore */ }
+  return rec;
+}
 
-document.getElementById('connectBtn').addEventListener('click', connectFolder);
-
-// Try to offer reconnect to a previously granted directory (Chromium only)
-(async ()=>{
-  if(!supportsFS) return;
-  const saved = await idbGet('lastDir');
-  if(saved){
-    document.getElementById('reconnectBtn').style.display = 'inline-flex';
-    document.getElementById('reconnectBtn').addEventListener('click', async ()=>{
-      try{
-        const perm = await saved.requestPermission({mode:'read'});
-        if(perm==='granted'){ dirHandle=saved; await scanHandle(saved); showToast('Reconnected.'); }
-        else showToast('Permission denied.');
-      }catch(e){ showToast('That folder is no longer available — connect again.'); }
-    });
+async function loadManifest(isRefresh){
+  const statusEl = document.getElementById('connectStatus');
+  statusEl.className = 'connect-status syncing';
+  statusEl.innerHTML = '<span class="dot"></span>'+(isRefresh?'Refreshing…':'Reading manifest…');
+  try{
+    const res = await fetch(MANIFEST_URL, {cache:'no-store'});
+    if(!res.ok) throw new Error('manifest.json not found (HTTP '+res.status+')');
+    const list = await res.json();
+    const names = list.map(item => typeof item==='string' ? item : item.name).filter(Boolean);
+    const records = names.map(n => buildRecord(n));
+    await Promise.all(records.map(probeFile));
+    resources = records;
+    statusEl.className = 'connect-status ok';
+    statusEl.innerHTML = '<span class="dot"></span>'+resources.length+' file(s) filed · synced '+new Date().toLocaleTimeString();
+    if(isRefresh) showToast(resources.length+' resource(s) loaded from manifest.');
+  }catch(err){
+    resources = [];
+    statusEl.className = 'connect-status';
+    const isFileProtocol = location.protocol === 'file:';
+    statusEl.innerHTML = '<span class="dot"></span>' + (isFileProtocol
+      ? 'Open this via a local server, not double-clicked'
+      : 'No manifest found yet');
+    if(isRefresh) showToast(isFileProtocol
+      ? "Browsers block file:// reads — serve this folder locally (see README.txt) or host it online."
+      : "Couldn't read resources/manifest.json — see \u201cHow to add resources\u201d.");
   }
-})();
+  renderAll();
+}
+
+document.getElementById('connectBtn').addEventListener('click', ()=>loadManifest(true));
+document.getElementById('howtoBtn').addEventListener('click', ()=> document.getElementById('howtoOverlay').classList.add('open'));
+document.getElementById('howtoClose').addEventListener('click', ()=> document.getElementById('howtoOverlay').classList.remove('open'));
+document.getElementById('howtoOverlay').addEventListener('click',(e)=>{ if(e.target.id==='howtoOverlay') e.currentTarget.classList.remove('open'); });
+document.addEventListener('keydown',(e)=>{ if(e.key==='Escape') document.getElementById('howtoOverlay').classList.remove('open'); });
 
 /* ============================================================
    RENDERING — hero stats, drawers, cards
@@ -835,8 +865,8 @@ function renderCards(){
     grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
       <h4>The stacks are empty</h4>
-      <p>Connect the folder that holds your course PDFs and files — The Reading Room will file each one under its matching course automatically.</p>
-      <button class="btn primary" onclick="document.getElementById('connectBtn').click()">Connect resource folder</button>
+      <p>Put a file in <code style="font-family:var(--mono)">/resources</code>, add its filename to <code style="font-family:var(--mono)">resources/manifest.json</code>, then refresh — The Reading Room will file it under its matching course automatically.</p>
+      <button class="btn primary" onclick="document.getElementById('howtoBtn').click()">How to add resources</button>
     </div>`;
     return;
   }
@@ -844,18 +874,23 @@ function renderCards(){
     grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><h4>No files here yet</h4><p>Nothing filed under this drawer or search yet.</p></div>`;
     return;
   }
+  const bookmarks = JSON.parse(localStorage.getItem('rr_bookmarks')||'{}');
   list.forEach(r=>{
     const card = document.createElement('div');
     card.className = 'rescard';
     card.style.setProperty('--tab', EXT_COLORS[r.ext] || '#5C5645');
+    const savedEntry = isPdf(r.name) ? bookmarks[bookmarkKey(r)] : null;
+    const savedPage = savedEntry && typeof savedEntry === 'object' ? savedEntry.page : null;
+    const pct = savedEntry && savedEntry.total ? Math.min(100, Math.round(savedEntry.page/savedEntry.total*100)) : null;
     card.innerHTML = `
       <div class="corner"></div>
       <div class="top"><span class="ext">${r.ext}</span><span class="acc">${r.accession}</span></div>
       <h4>${escapeHtml(r.name.replace(/\.[^.]+$/,''))}</h4>
       <div class="course">${r.course ? r.course.code+' · '+r.course.title : 'Unfiled · “'+escapeHtml(r.rawTag)+'”'}</div>
       <div class="meta"><span>${fmtSize(r.size)}</span><span class="leader"></span><span>${new Date(r.lastModified).toLocaleDateString()}</span></div>
+      ${savedPage ? `<div class="progress"><div class="bar"><i style="width:${pct!==null?pct:0}%"></i></div><span>p.${savedPage}${savedEntry.total?'/'+savedEntry.total:''}</span></div>` : ''}
       <div class="actions">
-        <button class="btn primary" data-act="open">${isPdf(r.name)?'Read':(isImage(r.name)?'View':'Open')}</button>
+        <button class="btn primary" data-act="open">${savedPage ? 'Continue' : (isPdf(r.name)?'Read':(isImage(r.name)?'View':'Open'))}</button>
         <button class="btn" data-act="dl">Download</button>
       </div>`;
     card.querySelector('[data-act="open"]').addEventListener('click',(e)=>{ e.stopPropagation(); openResource(r); });
@@ -867,9 +902,7 @@ function renderCards(){
 function escapeHtml(s){ return s.replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
 function downloadResource(r){
-  const url = URL.createObjectURL(r.file);
-  const a = document.createElement('a'); a.href=url; a.download=r.name; a.click();
-  setTimeout(()=>URL.revokeObjectURL(url), 4000);
+  const a = document.createElement('a'); a.href=r.url; a.download=r.name; a.click();
 }
 
 function openResource(r){
@@ -1009,8 +1042,7 @@ function showToast(msg){
    IMAGE LIGHTBOX
    ============================================================ */
 function openLightbox(r){
-  const url = URL.createObjectURL(r.file);
-  document.getElementById('lbImg').src = url;
+  document.getElementById('lbImg').src = r.url;
   document.getElementById('lbCap').textContent = r.name;
   document.getElementById('lightbox').classList.add('open');
 }
@@ -1039,43 +1071,63 @@ async function openReader(r){
   document.getElementById('rThumbs').innerHTML = '';
   Reader.thumbsBuilt = false;
   Reader.rotation = 0;
-  const url = URL.createObjectURL(r.file);
   try{
-    const loadingTask = pdfjsLib.getDocument(url);
+    const loadingTask = pdfjsLib.getDocument({url: r.url, disableAutoFetch:false, disableStream:false});
     const doc = await loadingTask.promise;
     Reader.doc = doc;
     Reader.pageCount = doc.numPages;
     document.getElementById('rPageTotal').textContent = doc.numPages;
     const saved = JSON.parse(localStorage.getItem('rr_bookmarks')||'{}');
-    Reader.currentPage = saved[bookmarkKey(r)] || 1;
+    const savedEntry = saved[bookmarkKey(r)];
+    Reader.currentPage = (savedEntry && savedEntry.page) ? Math.min(savedEntry.page, doc.numPages) : 1;
     await renderAllPages();
     scrollToPage(Reader.currentPage, true);
   }catch(err){
     document.getElementById('rCanvasWrap').innerHTML = '<div class="reader-loading">Could not open this PDF.<br><span style="opacity:.7;font-size:.75rem;">'+(err.message||'')+'</span></div>';
   }
 }
-function bookmarkKey(r){ return r.name+'_'+r.size; }
+function bookmarkKey(r){ return r.name; }
+
+// Cap the output-scale multiplier so a 3x zoom on a 3x-DPR screen doesn't
+// try to rasterize a 9x-resolution canvas (crashes on big scans / mobile GPUs).
+function outputScaleFor(cssScale){
+  const dpr = window.devicePixelRatio || 1;
+  return Math.min(dpr, 3, 4.5/Math.max(cssScale,0.4));
+}
 
 async function renderAllPages(){
   const wrap = document.getElementById('rCanvasWrap');
   wrap.innerHTML = '';
   Reader.pageEls = [];
+  Reader.renderToken = (Reader.renderToken||0) + 1;
+  const token = Reader.renderToken;
+  const outputScale = outputScaleFor(Reader.scale);
   for(let n=1;n<=Reader.pageCount;n++){
+    if(token !== Reader.renderToken) return; // superseded by a newer render (rapid zoom/rotate)
     const page = await Reader.doc.getPage(n);
     const viewport = page.getViewport({scale:Reader.scale, rotation:Reader.rotation});
     const shell = document.createElement('div');
     shell.className = 'pdf-page-shell';
     shell.dataset.page = n;
     const canvas = document.createElement('canvas');
-    canvas.width = viewport.width; canvas.height = viewport.height;
+    // Render at devicePixelRatio-scaled resolution but keep the CSS box at
+    // the true viewport size — this is what removes the blur on Retina/
+    // high-DPI phone screens, where 1 CSS px previously mapped to 1 canvas px.
+    canvas.width = Math.floor(viewport.width * outputScale);
+    canvas.height = Math.floor(viewport.height * outputScale);
+    canvas.style.width = Math.floor(viewport.width) + 'px';
+    canvas.style.height = Math.floor(viewport.height) + 'px';
     const badge = document.createElement('div'); badge.className='page-badge'; badge.textContent = 'Page '+n;
     shell.appendChild(canvas); shell.appendChild(badge);
     wrap.appendChild(shell);
     Reader.pageEls.push(shell);
     const ctx = canvas.getContext('2d');
-    await page.render({canvasContext:ctx, viewport}).promise;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    const transform = outputScale !== 1 ? [outputScale,0,0,outputScale,0,0] : undefined;
+    await page.render({canvasContext:ctx, viewport, transform}).promise;
   }
-  document.getElementById('rZoomLevel').textContent = Math.round(Reader.scale*100/1.1*100/100)+'%'; // baseline normalize below
+  if(token !== Reader.renderToken) return;
   updateZoomLabel();
   setupScrollObserver();
 }
@@ -1131,7 +1183,7 @@ document.getElementById('rThemeDark').addEventListener('click',()=>setTheme('dar
 document.getElementById('rBookmark').addEventListener('click',()=>{
   if(!Reader.resource) return;
   const saved = JSON.parse(localStorage.getItem('rr_bookmarks')||'{}');
-  saved[bookmarkKey(Reader.resource)] = Reader.currentPage;
+  saved[bookmarkKey(Reader.resource)] = {page:Reader.currentPage, total:Reader.pageCount};
   localStorage.setItem('rr_bookmarks', JSON.stringify(saved));
   showToast('Bookmarked page '+Reader.currentPage);
 });
@@ -1165,11 +1217,16 @@ document.getElementById('rThumbToggle').addEventListener('click', async ()=>{
   if(panel.classList.contains('open') && !Reader.thumbsBuilt && Reader.doc){
     Reader.thumbsBuilt = true;
     panel.innerHTML = '';
+    const thumbScale = outputScaleFor(0.18);
     for(let n=1;n<=Reader.pageCount;n++){
       const page = await Reader.doc.getPage(n);
       const vp = page.getViewport({scale:0.18});
-      const c = document.createElement('canvas'); c.width=vp.width; c.height=vp.height;
-      await page.render({canvasContext:c.getContext('2d'), viewport:vp}).promise;
+      const c = document.createElement('canvas');
+      c.width = Math.floor(vp.width*thumbScale); c.height = Math.floor(vp.height*thumbScale);
+      c.style.width = '100%';
+      const tctx = c.getContext('2d');
+      const ttransform = thumbScale !== 1 ? [thumbScale,0,0,thumbScale,0,0] : undefined;
+      await page.render({canvasContext:tctx, viewport:vp, transform:ttransform}).promise;
       const t = document.createElement('div'); t.className='thumb'; t.dataset.page=n;
       t.appendChild(c);
       const lab = document.createElement('div'); lab.className='n'; lab.textContent=n;
@@ -1225,6 +1282,7 @@ renderCards();
 renderCourseCatalog('');
 renderCgpaForm(); computeCgpa();
 renderRules();
+loadManifest(false);
 </script>
 </body>
 </html>
