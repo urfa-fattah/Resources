@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Reading Room · NeU CSE Year 1 Archive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+:root{
+  --paper:#F2EBD9;
+  --paper-deep:#E9DFC4;
+  --card:#FBF7EC;
+  --card-hover:#FFFDF6;
+  --ink:#26221A;
+  --ink-soft:#5C5645;
+  --ink-faint:#8B846E;
+  --navy:#1E3A4C;
+  --navy-deep:#12262F;
+  --brass:#A9772F;
+  --brass-soft:#D9B36C;
+  --brick:#A0402B;
+  --green:#4B7A5B;
+  --line:rgba(38,34,26,0.15);
+  --line-strong:rgba(38,34,26,0.32);
+  --shadow:0 1px 2px rgba(38,34,26,0.06),0 8px 24px -12px rgba(38,34,26,0.25);
+  --disp:'Fraunces',serif;
+  --body:'IBM Plex Sans',sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+  --r:3px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--body);
+  line-height:1.5;
+  min-height:100vh;
+  position:relative;
+}
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:radial-gradient(circle,rgba(38,34,26,0.09) 0.6px,transparent 0.6px);
+  background-size:16px 16px;
+  opacity:0.55;
+}
+::selection{background:var(--brass-soft);color:var(--navy-deep);}
+.wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:0 24px;}
+@media(prefers-reduced-motion:reduce){*{animation-duration:0.001ms !important;transition-duration:0.001ms !important;}}
+a{color:inherit;}
+button{font-family:inherit;}
+
+/* ---------- shared bits ---------- */
+.stamp{
+  font-family:var(--mono);font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--brass);border:1px solid var(--brass-soft);padding:3px 9px;border-radius:999px;
+  display:inline-flex;align-items:center;gap:6px;background:rgba(169,119,47,0.08);
+}
+.leader{flex:1;border-bottom:1.5px dotted var(--line-strong);margin:0 8px;position:relative;top:-3px;min-width:12px;}
+.btn{
+  font-family:var(--body);font-weight:600;font-size:0.84rem;
+  padding:10px 18px;border-radius:var(--r);border:1px solid var(--line-strong);
+  background:var(--card);color:var(--ink);cursor:pointer;text-decoration:none;
+  display:inline-flex;align-items:center;gap:8px;transition:transform .15s,box-shadow .15s,background .15s,border-color .15s;
+}
+.btn:hover{transform:translateY(-1px);box-shadow:var(--shadow);}
+.btn.primary{background:var(--navy);color:#F4EFDD;border-color:var(--navy);}
+.btn.primary:hover{box-shadow:0 8px 20px -8px rgba(18,38,47,0.55);}
+.btn.brick{background:var(--brick);color:#fbf3ea;border-color:var(--brick);}
+.btn svg{width:15px;height:15px;flex:none;}
+.btn:disabled{opacity:0.45;cursor:not-allowed;transform:none;box-shadow:none;}
+
+/* ---------- topbar ---------- */
+.topbar{position:sticky;top:0;z-index:80;background:rgba(242,235,217,0.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);}
+.topbar .inner{max-width:1280px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:18px;}
+.brandmark{display:flex;align-items:center;gap:10px;text-decoration:none;flex:none;}
+.brandmark .seal{width:36px;height:36px;border-radius:50%;border:1.6px solid var(--navy);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:0.62rem;font-weight:600;color:var(--navy);letter-spacing:-0.02em;}
+.brandmark .txt{display:flex;flex-direction:column;line-height:1.15;}
+.brandmark .txt b{font-family:var(--disp);font-weight:700;font-size:1.05rem;}
+.brandmark .txt span{font-family:var(--mono);font-size:0.63rem;letter-spacing:0.1em;color:var(--ink-faint);text-transform:uppercase;}
+.searchslip{flex:1;max-width:420px;position:relative;}
+.searchslip input{
+  width:100%;background:var(--card);border:1px solid var(--line-strong);border-radius:var(--r);
+  padding:9px 14px 9px 34px;font-family:var(--body);font-size:0.86rem;color:var(--ink);
+}
+.searchslip input:focus{outline:2px solid var(--brass-soft);outline-offset:1px;}
+.searchslip svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--ink-faint);}
+.navlinks{display:flex;gap:2px;flex:none;}
+.navlinks a{font-size:0.82rem;color:var(--ink-soft);text-decoration:none;padding:8px 11px;border-radius:var(--r);white-space:nowrap;transition:background .15s,color .15s;}
+.navlinks a:hover{color:var(--navy);background:rgba(30,58,76,0.08);}
+@media(max-width:980px){.navlinks{display:none;}}
+@media(max-width:760px){.searchslip{display:none;}}
+
+/* ---------- hero ---------- */
+.hero{padding:52px 0 34px;border-bottom:1px solid var(--line);}
+.hero-top{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;}
+.hero .eyebrow{font-family:var(--mono);font-size:0.7rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--brick);margin-bottom:14px;display:block;}
+.hero h1{font-family:var(--disp);font-weight:700;font-size:clamp(2rem,4.4vw,3.1rem);letter-spacing:-0.01em;line-height:1.06;max-width:680px;}
+.hero h1 i{font-style:italic;font-weight:500;color:var(--navy);}
+.hero p.lede{color:var(--ink-soft);margin-top:14px;max-width:560px;font-size:1rem;}
+.hero-stats{display:flex;gap:0;flex:none;border:1px solid var(--line-strong);border-radius:var(--r);overflow:hidden;background:var(--card);}
+.hero-stats .s{padding:14px 20px;text-align:center;border-right:1px solid var(--line);}
+.hero-stats .s:last-child{border-right:none;}
+.hero-stats .s b{display:block;font-family:var(--disp);font-size:1.5rem;font-weight:700;color:var(--navy);}
+.hero-stats .s small{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);}
+@media(max-width:640px){.hero-stats{flex-wrap:wrap;width:100%;}.hero-stats .s{flex:1 1 45%;}}
+
+.connect-row{margin-top:26px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.connect-status{font-family:var(--mono);font-size:0.76rem;color:var(--ink-faint);display:flex;align-items:center;gap:8px;}
+.connect-status .dot{width:7px;height:7px;border-radius:50%;background:var(--brick);flex:none;}
+.connect-status.ok .dot{background:var(--green);}
+
+/* ---------- section shells ---------- */
+section{padding:48px 0;border-bottom:1px solid var(--line);}
+.sec-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:26px;flex-wrap:wrap;}
+.sec-head .tag{font-family:var(--mono);font-size:0.68rem;color:var(--brick);letter-spacing:0.14em;text-transform:uppercase;}
+.sec-head h2{font-family:var(--disp);font-size:1.6rem;font-weight:700;margin-top:5px;}
+.sec-head p{color:var(--ink-soft);font-size:0.9rem;margin-top:5px;max-width:560px;}
+
+/* ---------- library layout ---------- */
+.library{display:grid;grid-template-columns:250px 1fr;gap:26px;align-items:start;}
+@media(max-width:880px){.library{grid-template-columns:1fr;}}
+.drawers{position:sticky;top:78px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);}
+.drawer-cab{border-bottom:1px solid var(--line);}
+.drawer-cab:last-child{border-bottom:none;}
+.drawer-cab-head{font-family:var(--mono);font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-faint);padding:12px 14px 6px;}
+.drawer-item{display:flex;align-items:center;gap:8px;padding:8px 14px;font-size:0.83rem;cursor:pointer;color:var(--ink-soft);border-left:3px solid transparent;transition:background .12s,color .12s,border-color .12s;}
+.drawer-item:hover{background:rgba(30,58,76,0.06);color:var(--navy);}
+.drawer-item.active{background:rgba(30,58,76,0.1);color:var(--navy);border-left-color:var(--navy);font-weight:600;}
+.drawer-item .code{font-family:var(--mono);font-size:0.72rem;flex:none;}
+.drawer-item .cnt{margin-left:auto;font-family:var(--mono);font-size:0.7rem;color:var(--ink-faint);background:rgba(38,34,26,0.06);padding:1px 6px;border-radius:999px;}
+.drawer-item.active .cnt{background:rgba(30,58,76,0.15);color:var(--navy);}
+.drawer-all{font-weight:600;}
+
+.panel-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px;flex-wrap:wrap;}
+.panel-toolbar h3{font-family:var(--disp);font-size:1.25rem;font-weight:700;}
+.panel-toolbar .sub{font-family:var(--mono);font-size:0.72rem;color:var(--ink-faint);margin-top:2px;}
+.sortbar{display:flex;gap:6px;}
+.chip{font-family:var(--mono);font-size:0.7rem;padding:6px 11px;border-radius:999px;border:1px solid var(--line-strong);background:var(--card);cursor:pointer;color:var(--ink-soft);}
+.chip.active{background:var(--navy);color:#F4EFDD;border-color:var(--navy);}
+
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;}
+.rescard{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;position:relative;
+  box-shadow:var(--shadow);transition:transform .15s,background .15s;cursor:pointer;
+}
+.rescard:hover{transform:translateY(-2px);background:var(--card-hover);}
+.rescard::before{content:'';position:absolute;top:14px;bottom:14px;left:0;width:4px;background:var(--tab,var(--navy));border-radius:0 3px 3px 0;}
+.rescard .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding-left:8px;}
+.rescard .ext{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.06em;padding:2px 7px;border-radius:3px;background:var(--tab,var(--navy));color:#fdf9ee;flex:none;}
+.rescard .acc{font-family:var(--mono);font-size:0.64rem;color:var(--ink-faint);}
+.rescard h4{font-family:var(--disp);font-size:1.02rem;font-weight:600;margin-top:10px;padding-left:8px;line-height:1.28;}
+.rescard .course{font-family:var(--mono);font-size:0.68rem;color:var(--brass);margin-top:6px;padding-left:8px;letter-spacing:0.03em;}
+.rescard .meta{display:flex;align-items:center;padding-left:8px;margin-top:12px;font-size:0.72rem;color:var(--ink-faint);}
+.rescard .actions{display:flex;gap:6px;margin-top:12px;padding-left:8px;}
+.rescard .actions button{flex:1;font-size:0.72rem;padding:7px 8px;}
+.corner{position:absolute;top:0;right:0;width:0;height:0;border-style:solid;border-width:0 16px 16px 0;border-color:transparent var(--paper-deep) transparent transparent;}
+
+.empty-state{border:1.5px dashed var(--line-strong);border-radius:var(--r);padding:48px 24px;text-align:center;color:var(--ink-soft);}
+.empty-state svg{width:38px;height:38px;color:var(--brass);margin-bottom:12px;}
+.empty-state h4{font-family:var(--disp);font-size:1.15rem;margin-bottom:6px;}
+.empty-state p{font-size:0.86rem;max-width:420px;margin:0 auto 16px;}
+
+/* ---------- courses ---------- */
+.course-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;}
+.course-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;}
+.course-head{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+.course-head .l .code{font-family:var(--mono);font-size:0.72rem;color:var(--brass);}
+.course-head .l h4{font-family:var(--disp);font-weight:600;font-size:1.05rem;margin-top:4px;}
+.course-head .l .tags{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+.tagpill{font-family:var(--mono);font-size:0.6rem;text-transform:uppercase;letter-spacing:0.06em;padding:2px 7px;border-radius:999px;border:1px solid var(--line-strong);color:var(--ink-faint);}
+.course-head .cr{font-family:var(--disp);font-weight:700;color:var(--navy);font-size:1.1rem;text-align:right;flex:none;}
+.course-head .cr small{display:block;font-family:var(--mono);font-weight:400;font-size:0.6rem;color:var(--ink-faint);text-transform:uppercase;}
+.course-body{max-height:0;overflow:hidden;transition:max-height .3s ease;border-top:1px solid transparent;}
+.course-card.open .course-body{max-height:2000px;border-top:1px solid var(--line);}
+.course-body-in{padding:14px 18px 18px;}
+.topic{padding:8px 0;border-bottom:1px dotted var(--line);}
+.topic:last-child{border-bottom:none;}
+.topic .g{display:flex;align-items:baseline;font-family:var(--disp);font-weight:600;font-size:0.86rem;}
+.topic .d{font-size:0.78rem;color:var(--ink-soft);margin-top:3px;line-height:1.5;}
+
+/* ---------- tools ---------- */
+.tool-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+@media(max-width:800px){.tool-grid{grid-template-columns:1fr;}}
+.tool-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:var(--shadow);}
+.tool-card h3{font-family:var(--disp);font-size:1.1rem;margin-bottom:4px;}
+.tool-card .hint{font-size:0.78rem;color:var(--ink-faint);margin-bottom:14px;}
+.cgpa-row{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:0.82rem;border-bottom:1px dotted var(--line);}
+.cgpa-row .cname{flex:1;font-family:var(--mono);font-size:0.74rem;}
+.cgpa-row select{font-family:var(--body);font-size:0.8rem;padding:4px 6px;border-radius:3px;border:1px solid var(--line-strong);background:var(--paper);}
+.result-strip{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:14px;border-top:1px solid var(--line-strong);}
+.result-strip .val{font-family:var(--disp);font-size:2rem;font-weight:700;color:var(--navy);}
+.att-input-row{display:flex;gap:8px;}
+.att-input-row input{flex:1;padding:9px 12px;border-radius:3px;border:1px solid var(--line-strong);background:var(--paper);font-family:var(--body);font-size:0.9rem;}
+.att-out{margin-top:14px;font-size:0.88rem;display:none;}
+.status{font-weight:600;padding:2px 8px;border-radius:999px;font-size:0.76rem;}
+.status.ok{background:rgba(75,122,91,0.15);color:var(--green);}
+.status.fine{background:rgba(169,119,47,0.15);color:var(--brass);}
+.status.barred{background:rgba(160,64,43,0.15);color:var(--brick);}
+
+/* ---------- rules accordion ---------- */
+.accordion .acc-item{border-bottom:1px solid var(--line);}
+.acc-head{padding:14px 4px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-weight:600;font-size:0.92rem;font-family:var(--disp);}
+.acc-head svg{width:16px;height:16px;transition:transform .2s;flex:none;color:var(--brass);}
+.acc-item.open .acc-head svg{transform:rotate(180deg);}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .3s ease;font-size:0.85rem;color:var(--ink-soft);}
+.acc-item.open .acc-body{max-height:600px;}
+.acc-body-in{padding:0 4px 16px;}
+.acc-body table{width:100%;border-collapse:collapse;margin-top:6px;font-size:0.8rem;}
+.acc-body th,.acc-body td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;}
+.acc-body th{font-family:var(--mono);font-size:0.68rem;text-transform:uppercase;color:var(--ink-faint);}
+
+footer{padding:32px 0 60px;text-align:center;color:var(--ink-faint);font-size:0.8rem;}
+footer .fm{font-family:var(--mono);font-size:0.7rem;margin-top:6px;}
+
+/* ---------- reader overlay ---------- */
+.reader-overlay{position:fixed;inset:0;background:var(--navy-deep);z-index:200;display:none;flex-direction:column;}
+.reader-overlay.open{display:flex;}
+.reader-overlay.theme-sepia{background:#2b2415;}
+.reader-toolbar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:rgba(18,38,47,0.9);border-bottom:1px solid rgba(244,239,221,0.12);flex-wrap:wrap;}
+.reader-toolbar .grp{display:flex;align-items:center;gap:4px;}
+.reader-toolbar .title{font-family:var(--disp);font-size:0.92rem;color:#F4EFDD;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:auto;}
+.rbtn{background:transparent;border:1px solid rgba(244,239,221,0.2);color:#F4EFDD;width:32px;height:32px;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s;flex:none;}
+.rbtn:hover{background:rgba(244,239,221,0.12);}
+.rbtn svg{width:15px;height:15px;}
+.rbtn.wide{width:auto;padding:0 10px;gap:6px;font-family:var(--mono);font-size:0.72rem;}
+.reader-toolbar input.pgnum{width:44px;background:rgba(244,239,221,0.08);border:1px solid rgba(244,239,221,0.2);color:#F4EFDD;text-align:center;border-radius:4px;font-family:var(--mono);font-size:0.78rem;padding:5px 2px;}
+.pgof{font-family:var(--mono);font-size:0.74rem;color:rgba(244,239,221,0.7);}
+.readsearch{display:flex;align-items:center;gap:4px;background:rgba(244,239,221,0.08);border-radius:4px;padding:0 6px;}
+.readsearch input{background:transparent;border:none;color:#F4EFDD;font-size:0.78rem;padding:6px 4px;width:110px;}
+.readsearch input:focus{outline:none;}
+.readsearch .cnt{font-family:var(--mono);font-size:0.68rem;color:rgba(244,239,221,0.6);white-space:nowrap;}
+.reader-body{flex:1;display:flex;overflow:hidden;}
+.reader-thumbs{width:132px;flex:none;overflow-y:auto;background:rgba(18,38,47,0.6);border-right:1px solid rgba(244,239,221,0.1);padding:10px;display:none;}
+.reader-thumbs.open{display:block;}
+.thumb{margin-bottom:10px;cursor:pointer;border:2px solid transparent;border-radius:3px;overflow:hidden;}
+.thumb.active{border-color:var(--brass-soft);}
+.thumb canvas{width:100%;display:block;}
+.thumb .n{font-family:var(--mono);font-size:0.62rem;text-align:center;color:rgba(244,239,221,0.6);padding:2px 0;}
+.reader-canvas-wrap{flex:1;overflow:auto;padding:26px 0;display:flex;flex-direction:column;align-items:center;gap:22px;}
+.pdf-page-shell{background:#fff;box-shadow:0 10px 40px rgba(0,0,0,0.45);position:relative;}
+.reader-overlay.theme-dark .pdf-page-shell{filter:invert(1) hue-rotate(180deg);}
+.reader-overlay.theme-sepia .pdf-page-shell{filter:sepia(0.55) brightness(0.96);}
+.page-badge{position:absolute;bottom:-20px;right:0;font-family:var(--mono);font-size:0.65rem;color:rgba(244,239,221,0.55);}
+.reader-loading{color:#F4EFDD;font-family:var(--mono);font-size:0.85rem;margin:auto;display:flex;flex-direction:column;align-items:center;gap:10px;}
+.spinner{width:26px;height:26px;border-radius:50%;border:2.5px solid rgba(244,239,221,0.25);border-top-color:var(--brass-soft);animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+mark{background:var(--brass-soft);color:var(--navy-deep);border-radius:2px;padding:0 1px;}
+
+/* ---------- lightbox ---------- */
+.lightbox{position:fixed;inset:0;background:rgba(18,26,31,0.94);z-index:200;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:24px;}
+.lightbox.open{display:flex;}
+.lightbox img{max-width:92vw;max-height:78vh;border-radius:4px;box-shadow:0 20px 60px rgba(0,0,0,0.5);}
+.lightbox .cap{color:#F4EFDD;font-family:var(--mono);font-size:0.8rem;}
+
+/* toast */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy-deep);color:#F4EFDD;padding:11px 20px;border-radius:6px;font-size:0.84rem;z-index:300;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;font-family:var(--body);box-shadow:0 10px 30px rgba(0,0,0,0.3);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
+:focus-visible{outline:2px solid var(--navy);outline-offset:2px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="inner">
+    <a href="#top" class="brandmark">
+      <span class="seal">CSE<br>I</span>
+      <span class="txt"><b>The Reading Room</b><span>NeU · CSE Batch 7 · Year 1</span></span>
+    </a>
+    <div class="searchslip">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="globalSearch" type="text" placeholder="Search resources, courses, topics…" autocomplete="off">
+    </div>
+    <div class="navlinks">
+      <a href="#library">Library</a>
+      <a href="#courses">Courses</a>
+      <a href="#tools">Tools</a>
+      <a href="#rules">Rules</a>
+    </div>
+  </div>
+</div>
+
+<div id="top"></div>
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-top">
+      <div>
+        <span class="eyebrow">Personal academic archive</span>
+        <h1>Every handout, note<br>and past paper — <i>catalogued.</i></h1>
+        <p class="lede">Connect the folder where you keep your PDFs and files. The Reading Room reads each filename, files it under the matching Year‑1 course automatically, and opens it in a built‑in reader — no uploading, nothing leaves your device.</p>
+      </div>
+      <div class="hero-stats" id="heroStats"></div>
+    </div>
+    <div class="connect-row">
+      <button class="btn primary" id="connectBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
+        Connect resource folder
+      </button>
+      <button class="btn" id="reconnectBtn" style="display:none;">Reconnect previous folder</button>
+      <input type="file" id="fallbackInput" webkitdirectory directory multiple style="display:none;">
+      <span class="connect-status" id="connectStatus"><span class="dot"></span>No folder connected yet</span>
+    </div>
+  </div>
+</header>
+
+<section id="library">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><span class="tag">01 — The Stacks</span><h2>Resource Library</h2><p>Files are sorted the moment you connect a folder, using the first token of each filename (e.g. <code style="font-family:var(--mono)">Math1105-calculus.pdf</code> → MATH‑1105).</p></div>
+    </div>
+    <div class="library">
+      <nav class="drawers" id="drawers"></nav>
+      <div>
+        <div class="panel-toolbar">
+          <div><h3 id="panelTitle">All resources</h3><div class="sub" id="panelSub">0 files</div></div>
+          <div class="sortbar" id="sortbar">
+            <button class="chip active" data-sort="recent">Recent</button>
+            <button class="chip" data-sort="name">A–Z</button>
+            <button class="chip" data-sort="type">Type</button>
+          </div>
+        </div>
+        <div id="cardGrid" class="card-grid"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="courses">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><span class="tag">02 — The Catalog</span><h2>Year 1 Course Index</h2><p>Full syllabus reference for both semesters of NeU CSE's first year, drawn straight from the department roadmap.</p></div>
+    </div>
+    <div id="semesterBlocks"></div>
+  </div>
+</section>
+
+<section id="tools">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><span class="tag">03 — The Ledger</span><h2>Quick Tools</h2><p>Estimate your CGPA and check exam eligibility from attendance — figures stay on this device.</p></div>
+    </div>
+    <div class="tool-grid">
+      <div class="tool-card">
+        <h3>CGPA Estimator</h3>
+        <div class="hint">Pick a grade for each course you've completed.</div>
+        <div id="cgpaForm"></div>
+        <div class="result-strip"><span style="font-family:var(--mono);font-size:0.72rem;color:var(--ink-faint);text-transform:uppercase;">Estimated CGPA</span><span class="val" id="cgpaVal">—</span></div>
+        <button class="btn" id="resetCgpa" style="margin-top:10px;">Reset</button>
+      </div>
+      <div class="tool-card">
+        <h3>Attendance Eligibility</h3>
+        <div class="hint">Enter your attendance percentage for a course to check final‑exam eligibility.</div>
+        <div class="att-input-row">
+          <input type="number" id="attInput" min="0" max="100" step="0.1" placeholder="e.g. 78">
+          <button class="btn primary" id="attCheck">Check</button>
+        </div>
+        <div class="att-out" id="attOut"></div>
+        <div style="margin-top:20px;border-top:1px dotted var(--line);padding-top:16px;">
+          <table style="width:100%;font-size:0.78rem;border-collapse:collapse;">
+            <tr><th style="text-align:left;color:var(--ink-faint);font-family:var(--mono);font-size:0.65rem;text-transform:uppercase;padding-bottom:6px;">Attendance</th><th style="text-align:left;color:var(--ink-faint);font-family:var(--mono);font-size:0.65rem;text-transform:uppercase;">Status</th></tr>
+            <tr><td style="padding:3px 0;">≥ 75%</td><td>Free, no fine</td></tr>
+            <tr><td style="padding:3px 0;">60% – 74%</td><td>Eligible, Tk. 500 fine</td></tr>
+            <tr><td style="padding:3px 0;">&lt; 60%</td><td>Barred from final exam</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="rules">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><span class="tag">04 — Fine Print</span><h2>Academic Rules & Regulations</h2><p>The policies every Year‑1 course card above is graded against.</p></div>
+    </div>
+    <div class="accordion" id="accordion"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>The Reading Room — a private archive for NeU CSE Batch 7, Year 1.</div>
+    <div class="fm">All files stay local to this browser · nothing is uploaded anywhere</div>
+  </div>
+</footer>
+
+<!-- PDF READER -->
+<div class="reader-overlay" id="reader">
+  <div class="reader-toolbar">
+    <button class="rbtn" id="rThumbToggle" title="Toggle thumbnails" aria-label="Toggle thumbnails"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+    <div class="title" id="rTitle">document.pdf</div>
+    <div class="grp">
+      <button class="rbtn" id="rPrev" title="Previous page" aria-label="Previous page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <input class="pgnum" id="rPageNum" value="1"><span class="pgof">/ <span id="rPageTotal">1</span></span>
+      <button class="rbtn" id="rNext" title="Next page" aria-label="Next page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>
+    </div>
+    <div class="grp">
+      <button class="rbtn" id="rZoomOut" title="Zoom out" aria-label="Zoom out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/><path d="M8 11h6"/></svg></button>
+      <button class="rbtn wide" id="rZoomLevel">100%</button>
+      <button class="rbtn" id="rZoomIn" title="Zoom in" aria-label="Zoom in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/><path d="M11 8v6M8 11h6"/></svg></button>
+      <button class="rbtn wide" id="rFitWidth">Fit width</button>
+    </div>
+    <div class="readsearch">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;color:rgba(244,239,221,0.6);flex:none;"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="rSearchInput" placeholder="Find in document…">
+      <span class="cnt" id="rSearchCnt"></span>
+      <button class="rbtn" id="rSearchPrev" title="Previous match" style="width:24px;height:24px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg></button>
+      <button class="rbtn" id="rSearchNext" title="Next match" style="width:24px;height:24px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+    </div>
+    <div class="grp">
+      <button class="rbtn" id="rRotate" title="Rotate" aria-label="Rotate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg></button>
+      <button class="rbtn" id="rThemeLight" title="Light theme" style="border-color:var(--brass-soft);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
+      <button class="rbtn" id="rThemeSepia" title="Sepia theme"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9"/></svg></button>
+      <button class="rbtn" id="rThemeDark" title="Dark theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg></button>
+    </div>
+    <div class="grp">
+      <button class="rbtn" id="rBookmark" title="Bookmark this page" aria-label="Bookmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg></button>
+      <button class="rbtn" id="rFullscreen" title="Fullscreen" aria-label="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></button>
+      <button class="rbtn" id="rDownload" title="Download" aria-label="Download"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg></button>
+      <button class="rbtn" id="rClose" title="Close (Esc)" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+  </div>
+  <div class="reader-body">
+    <div class="reader-thumbs" id="rThumbs"></div>
+    <div class="reader-canvas-wrap" id="rCanvasWrap"><div class="reader-loading"><div class="spinner"></div>Opening document…</div></div>
+  </div>
+</div>
+
+<!-- IMAGE LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <img id="lbImg" src="" alt="">
+  <div class="cap" id="lbCap"></div>
+  <button class="btn" id="lbClose">Close</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   COURSE CATALOG DATA — NeU CSE, Year 1, Batch 7
+   ============================================================ */
+const courses = [
+{code:"CSE-1101",title:"Structured Programming Language",credits:3,sem:1,type:"theory",related:null,
+ topics:[
+  {g:"Review of Basics",d:"Basic I/O, data types, conditional logic, switch case, characters, ASCII values, reading/writing characters, integer–character conversion."},
+  {g:"Operators",d:"Arithmetic, relational, logical and bitwise operators; precedence and associativity; expression evaluation; shortcut operators."},
+  {g:"Functions I",d:"Basic functions, void functions with no parameters."},
+  {g:"Loops",d:"While, for and do‑while loops; entry/exit controlled loops; formulating problems using loops."},
+  {g:"Formatted I/O",d:"Specifying width using format specifiers in printf and scanf."},
+  {g:"Nested Loops",d:"Nesting of two, independent and more than two loops."},
+  {g:"Functions II",d:"Functions with return type and parameters, local/global variables, call by value, library functions."},
+  {g:"Arrays",d:"1D and 2D array basics, declaration, indexing, initialization, multidimensional arrays."},
+  {g:"Functions III",d:"Passing arrays as parameters, call by reference, recursion, scope and lifetime of variables."},
+  {g:"Strings",d:"String vs character array, I/O, basic operations without library functions, arrays of strings."},
+  {g:"String Library",d:"Length, compare, concatenate, substring, reverse."},
+  {g:"Structures",d:"Declaration, accessing, initialization, arrays of structures."},
+  {g:"Pointers",d:"Pointer operations, call by reference, pointers for 1D/2D/3D arrays and structures, arrays of pointers, functions returning pointers."},
+  {g:"Dynamic Memory Allocation",d:"malloc, free, calloc, realloc."},
+  {g:"File Operation",d:"Opening, closing, reading, writing, redirect operators."},
+  {g:"Preprocessors and Macros",d:""}
+ ]},
+{code:"CSE-1102",title:"Discrete Mathematics",credits:3,sem:1,type:"theory",related:null,
+ topics:[
+  {g:"Logics and Proofs",d:"Propositional logic and its applications, propositional equivalences, predicates and quantifiers, rules of inference, introduction to proofs."},
+  {g:"Set, Function, Sequence, Summation, Matrix",d:"Sets, set operations, functions, sequences and summations, zero‑one matrices, Boolean product."},
+  {g:"Number Theory",d:"Divisibility, modular arithmetic, integer representations, primes, GCD, modular exponentiation."},
+  {g:"Induction",d:"Mathematical induction."},
+  {g:"Counting",d:"Basics of counting, pigeonhole principle, permutations and combinations, binomial coefficients."},
+  {g:"Recursion",d:"Applications of recurrence relations."},
+  {g:"Inclusion–Exclusion",d:"Inclusion–exclusion principle."},
+  {g:"Relations",d:"Relations and their properties, representing relations."},
+  {g:"Graphs",d:"Graph models, terminology, special graph types, Euler and Hamilton paths."},
+  {g:"Trees",d:"Introduction to trees."}
+ ]},
+{code:"EEE-1103",title:"Electrical Circuits",credits:3,sem:1,type:"theory",related:null,
+ topics:[
+  {g:"Resistor",d:"Properties, types, Ohm's law, power, energy, efficiency."},
+  {g:"Series DC Circuits",d:"KVL, voltage divider rule, power distribution, voltage regulation, sources in series."},
+  {g:"Parallel DC Circuits",d:"Conductance, KCL, current divider rule, open/short circuits, sources in parallel."},
+  {g:"DC Series‑Parallel Networks",d:"Reduce‑and‑return approach, block diagram approach, ladder networks."},
+  {g:"Methods of Analysis for DC Networks",d:"Source conversion, branch‑current analysis, mesh and nodal analysis, bridge networks, Y‑Δ/Δ‑Y conversion."},
+  {g:"Network Theorems (DC)",d:"Superposition, Thevenin's, Norton's, maximum power transfer, Millman's, substitution, reciprocity."},
+  {g:"Capacitor",d:"Electric field, capacitance, dielectric strength, types, charge/discharge, energy stored, series/parallel."},
+  {g:"Inductor",d:"Magnetic field, inductance, Faraday's and Lenz's laws, series/parallel."},
+  {g:"R‑L, R‑C, R‑L‑C Circuits (DC)",d:""},
+  {g:"Sinusoidal AC Waveforms",d:"Phase relations, average/RMS values, response of R,L,C, average power, power factor, phasors."}
+ ]},
+{code:"PHY-1104",title:"Physics",credits:3,sem:1,type:"theory",related:null,
+ topics:[
+  {g:"Heat and Thermodynamics",d:"Zeroth, first and second laws, reversible/irreversible processes, Carnot cycle and efficiency, entropy."},
+  {g:"Structure of Matter",d:"Crystalline/non‑crystalline solids, unit cells, Miller indices, Bragg's law, defects, band theory."},
+  {g:"Waves and Oscillations",d:"Simple harmonic oscillators, damped/forced oscillation, resonance, progressive/stationary waves, acoustics."},
+  {g:"Physical Optics",d:"Interference, Young's double slit, Fresnel biprism, Newton's rings, diffraction, gratings, polarization."}
+ ]},
+{code:"MATH-1105",title:"Differential and Integral Calculus",credits:3,sem:1,type:"theory",related:null,
+ topics:[
+  {g:"Functions",d:"Graphing, common function models, transformations, inverses, growth of functions."},
+  {g:"Limits",d:"One‑sided/infinite limits, limit laws, sandwich theorem, continuity, IVT, limits at infinity."},
+  {g:"Derivatives",d:"Rate of change, differentiability, rules and techniques of differentiation."},
+  {g:"Applications of Differentiation",d:"Growth/decay, linear approximation, extrema, L'Hospital's rule, curve sketching."},
+  {g:"Integrals",d:"Riemann sums, properties, fundamental theorem of calculus, substitution rule."},
+  {g:"Application of Integration",d:"Area between curves, volumes, shell method, mean value theorem."}
+ ]},
+{code:"ENG-1106",title:"Teaching and Communicative English",credits:2,sem:1,type:"theory",related:null,
+ topics:[
+  {g:"Grammar",d:"Modals, phrases and idioms, prefixes/suffixes, sentence structures, questions, conditionals."},
+  {g:"Vocabulary",d:"Technical and scientific vocabulary, defining terms."},
+  {g:"Spoken English",d:"Phonetic symbols, dialogue, situational responses, extempore speech."},
+  {g:"Reading",d:"Skimming, scanning, inferring, responding to context."},
+  {g:"Technical Writing",d:"Paragraphs, reports, research papers, library references."},
+  {g:"Professional Communication",d:"Business letters, job applications, memos, quotations, tender notices."}
+ ]},
+{code:"CSE-1111",title:"Structured Programming Language Lab",credits:1.5,sem:1,type:"lab",related:"CSE-1101",topics:[]},
+{code:"EEE-1113",title:"Electrical Circuits Lab",credits:1.5,sem:1,type:"lab",related:"EEE-1103",topics:[]},
+
+{code:"CSE-1201",title:"Object Oriented Programming (C++)",credits:3,sem:2,type:"theory",related:null,
+ topics:[
+  {g:"Fundamentals of OOP",d:"Principles of object‑oriented design, advantages over structured programming."},
+  {g:"Classes and Objects",d:"Public/private/protected members, arrays of objects, nested classes, static members, friend functions."},
+  {g:"Constructors and Destructors",d:"Default, argumented, copy and dynamic constructors, order of execution, destructors."},
+  {g:"Inheritance",d:"Single vs multiple inheritance, modes of inheritance, virtual inheritance."},
+  {g:"Polymorphism",d:"Abstract classes, run‑time/compile‑time polymorphism, virtual functions, RTTI, operator overloading."},
+  {g:"Advanced Topics",d:"Exception handling, templates, namespaces, STL, multi‑threaded programming."}
+ ]},
+{code:"CSE-1202",title:"Data Structures and Algorithms",credits:3,sem:2,type:"theory",related:null,
+ topics:[
+  {g:"Introduction",d:"Abstract data types, Big‑O runtime complexity, space complexity."},
+  {g:"Linked List",d:"Singly/doubly/circular lists, insertion/deletion/traversal, dynamic arrays."},
+  {g:"Stack and Queue",d:"Push/pop/peek, array/linked‑list implementation, infix–postfix conversion, circular queue, Josephus problem."},
+  {g:"Recursion",d:"Base case, self‑call, state change; merge sort, permutations, combinations."},
+  {g:"Sorting",d:"Insertion, selection, bubble, merge, quick, counting, radix, bucket sort, external sort."},
+  {g:"Binary Tree",d:"Array/pointer representation, in‑order/pre‑order/post‑order traversal."},
+  {g:"Binary Search Tree",d:"Creation, insertion, deletion, querying, traversal."},
+  {g:"Searching",d:"Linear and binary search and their applications."},
+  {g:"Heap",d:"Min‑heap, max‑heap, Fibonacci heap, priority queue, heap sort."},
+  {g:"General Tree",d:"Implementation and file‑system application."},
+  {g:"Disjoint Set",d:"Union‑find, path compression."},
+  {g:"Huffman Coding",d:"Implementation and compression application."},
+  {g:"Graph",d:"Adjacency matrix/list, BFS, DFS, bicoloring."},
+  {g:"Self‑balancing BST",d:"AVL tree rotation and insertion."},
+  {g:"Set Operations",d:"Bitmask representation, set/clear/toggle bits, LSB."},
+  {g:"String ADT",d:"Concatenation, substrings, matching, parsing."}
+ ]},
+{code:"EEE-1203",title:"Digital Logic Design",credits:3,sem:2,type:"theory",related:null,
+ topics:[
+  {g:"Introduction",d:"Binary, octal, hexadecimal systems, BCD, ASCII, EBCDIC."},
+  {g:"Combinational Logic",d:"Logic gates, Boolean algebra, NAND/NOR‑only design, K‑map, Quine–McCluskey minimization."},
+  {g:"Sequential Logic",d:"NAND/NOR latches, clocked SR/JK/D/T flip‑flops, master‑slave FF."},
+  {g:"Complex Sequential Logic",d:"Frequency division, ripple counters, presettable counters, the 74193 counter."},
+  {g:"Decoding a Counter",d:"Cascading counters, shift registers, IC shift digital clock."},
+  {g:"MSI Logic Circuits",d:"BCD‑to‑decimal decoders, BCD‑to‑7‑segment drivers, encoders, mux/demux."},
+  {g:"IC Logic Families",d:"TTL series characteristics, loading rules, digital MOSFET circuits."},
+  {g:"Memory Devices",d:"ROM/EPROM/EEPROM, static/dynamic RAM, refreshing."},
+  {g:"Sequential Circuits",d:"Formal representation of sequential circuits."},
+  {g:"Arithmetic Circuits",d:"Half‑adder, full adder, parallel adders."}
+ ]},
+{code:"MATH-1204",title:"Methods of Integration, Differential Equations & Series",credits:3,sem:2,type:"theory",related:null,
+ topics:[
+  {g:"Techniques of Integration",d:"By parts, trigonometric substitution, partial fractions, Simpson's rule, improper integrals."},
+  {g:"Application of Integration",d:"Arc length, surface area of revolution."},
+  {g:"Differential Equations",d:"Modeling, first‑order equations, direction fields, Euler's method, separable/linear equations."},
+  {g:"Parametric Equations & Polar Coordinates",d:"Parametric curves, calculus with them, polar area/length, conics."},
+  {g:"Sequences & Infinite Series",d:"Convergence tests, power series, Taylor/Maclaurin series, approximating polynomials."}
+ ]},
+{code:"EEE-1205",title:"Electronic Devices and Circuits",credits:3,sem:2,type:"theory",related:null,
+ topics:[
+  {g:"Introduction to Semiconductors",d:"Properties, bonds and types of semiconductors."},
+  {g:"Diodes",d:"pn junction formation and V‑I characteristics, LEDs, Zener diodes."},
+  {g:"Diode Applications",d:"Rectifiers, ripple factor, filters, clipping/clamping, voltage regulation."},
+  {g:"Bipolar Junction Transistors",d:"npn/pnp transistors, CB/CE/CC configurations, load line, operating point."},
+  {g:"BJT Biasing",d:"Thermal runaway, stabilization, biasing circuit design."},
+  {g:"Single Stage Transistor Amplifier",d:"Phase reversal, DC/AC equivalent circuits, gain, amplifier classes."},
+  {g:"Field Effect Transistors",d:"JFET/MOSFET construction and characteristics, Shockley's equation, DC biasing."},
+  {g:"Power Electronics",d:"SCR, TRIAC, DIAC operation and applications."},
+  {g:"Feedback & Op‑amps",d:"Negative/positive feedback, inverting/non‑inverting amps, integrators, differentiators."},
+  {g:"Oscillators",d:"Theory and characteristics of oscillator types."},
+  {g:"Introduction to IC Fabrication",d:""}
+ ]},
+{code:"CSE-1211",title:"OOP (C++) Lab",credits:1.5,sem:2,type:"lab",related:"CSE-1201",topics:[]},
+{code:"CSE-1212",title:"Data Structures and Algorithms Lab",credits:1.5,sem:2,type:"lab",related:"CSE-1202",topics:[]},
+{code:"EEE-1213",title:"Digital Logic Design Lab",credits:1.5,sem:2,type:"lab",related:"EEE-1203",topics:[]},
+{code:"EEE-1215",title:"Electronics Devices and Circuits Lab",credits:1.5,sem:2,type:"lab",related:"EEE-1205",topics:[]}
+];
+
+const gradeScale = [
+ {l:"A+",p:4.00},{l:"A",p:3.75},{l:"A-",p:3.50},{l:"B+",p:3.25},{l:"B",p:3.00},
+ {l:"B-",p:2.75},{l:"C+",p:2.50},{l:"C",p:2.25},{l:"D",p:2.00},{l:"F",p:0.00}
+];
+
+const rules = [
+ {t:"Course Designation", b:"Each course code = department prefix + 4‑digit number. Digit 1 = year, digit 2 = semester (1=odd, 2=even), digit 3 = odd for theory / even for lab / 0 for board viva, digit 4 = course ID. E.g. CSE‑1102 = Discrete Mathematics, Year 1, Semester 1, theory."},
+ {t:"Credit Definition", b:"Theory: 15 class‑hours of 50 minutes = 1 credit. Lab: 30 hours of work = 1 credit."},
+ {t:"Grading Scale", b:`<table><tr><th>Marks</th><th>Grade</th><th>Point</th></tr>
+   <tr><td>80% and above</td><td>A+</td><td>4.00</td></tr>
+   <tr><td>75% to &lt;80%</td><td>A</td><td>3.75</td></tr>
+   <tr><td>70% to &lt;75%</td><td>A-</td><td>3.50</td></tr>
+   <tr><td>65% to &lt;70%</td><td>B+</td><td>3.25</td></tr>
+   <tr><td>60% to &lt;65%</td><td>B</td><td>3.00</td></tr>
+   <tr><td>55% to &lt;60%</td><td>B-</td><td>2.75</td></tr>
+   <tr><td>50% to &lt;55%</td><td>C+</td><td>2.50</td></tr>
+   <tr><td>45% to &lt;50%</td><td>C</td><td>2.25</td></tr>
+   <tr><td>40% to &lt;45%</td><td>D</td><td>2.00</td></tr>
+   <tr><td>Less than 40%</td><td>F</td><td>0.00</td></tr></table>
+   Only "D" or higher counts as credit earned. One "F" blocks the degree. CGPA = Σ(grade point × credits) / total credits taken.`},
+ {t:"Marks Distribution", b:"Theory: attendance/assignment 10% + in‑course exam 30% + final exam 60%. Lab: attendance 10% + continuous evaluation 40–90% + final exam 0–60%."},
+ {t:"Attendance → Marks", b:`<table><tr><th>Attendance</th><th>/5</th><th>/10</th></tr>
+   <tr><td>90% and above</td><td>05</td><td>10</td></tr>
+   <tr><td>85–89%</td><td>04</td><td>08</td></tr>
+   <tr><td>80–84%</td><td>03</td><td>06</td></tr>
+   <tr><td>75–79%</td><td>02</td><td>04</td></tr>
+   <tr><td>60–74%</td><td>01</td><td>02</td></tr>
+   <tr><td>Below 60%</td><td>00</td><td>00</td></tr></table>`},
+ {t:"Eligibility for Final Exam", b:"≥75% average attendance = free eligibility. 60–74% = eligible with a Tk. 500 fine. Below 60% = barred; may seek re‑admission."},
+ {t:"Promotion to Year 2", b:"Requires attending required courses, appearing at annual exams, and a minimum CGPA of 2.00 to move from 1st to 2nd year."},
+ {t:"Improvement, Retake & Special Exam", b:"Improvement: once only, for theory courses graded ≤C+, capped at B+ after improvement. Retake: for an F grade, one chance, held with the next batch. Special Examination: final chance to clear an F if the retake also fails, held after final‑year results are published."},
+ {t:"Re‑admission & Dropout", b:"Maximum 2 re‑admissions to complete the program, each requiring ≥30% attendance in the previous semester/year. A student who still cannot reach the minimum CGPA after 2 re‑admissions is dropped from the program."},
+ {t:"Dean's Award", b:"Given per batch after program completion if the student never sat for an improvement exam, achieved CGPA ≥3.75, with a maximum of 2 awardees per department."}
+];
+
+/* ============================================================
+   CATEGORISATION ENGINE
+   ============================================================ */
+const courseByKey = {};
+courses.forEach(c=>{ courseByKey[c.code.replace(/-/g,'').toUpperCase()] = c; });
+const knownKeys = Object.keys(courseByKey).sort((a,b)=>b.length-a.length);
+
+function normalizeToken(tok){ return (tok||'').replace(/[^a-zA-Z0-9]/g,'').toUpperCase(); }
+
+function matchCourse(filename){
+  const base = filename.replace(/\.[^.]+$/,'');
+  const firstTok = base.split(/[-_\s.]+/)[0] || base;
+  const norm = normalizeToken(firstTok);
+  if(courseByKey[norm]) return {course:courseByKey[norm], rawTag:firstTok};
+  for(const k of knownKeys){
+    if(norm.startsWith(k)) return {course:courseByKey[k], rawTag:firstTok};
+  }
+  // try matching against the whole filename in case there's no separator at all
+  const wholeNorm = normalizeToken(base);
+  for(const k of knownKeys){
+    if(wholeNorm.startsWith(k)) return {course:courseByKey[k], rawTag:firstTok};
+  }
+  return {course:null, rawTag: firstTok || 'Misc'};
+}
+
+const EXT_COLORS = {pdf:'#A0402B', doc:'#1E3A4C', docx:'#1E3A4C', ppt:'#A9772F', pptx:'#A9772F', xls:'#4B7A5B', xlsx:'#4B7A5B', png:'#7A5C8E', jpg:'#7A5C8E', jpeg:'#7A5C8E', txt:'#5C5645', zip:'#5C5645'};
+function extOf(name){ const m=name.match(/\.([a-zA-Z0-9]+)$/); return m? m[1].toLowerCase() : 'file'; }
+function isPdf(name){ return extOf(name)==='pdf'; }
+function isImage(name){ return ['png','jpg','jpeg','gif','webp'].includes(extOf(name)); }
+function fmtSize(b){ if(!b) return ''; const u=['B','KB','MB','GB']; let i=0; while(b>=1024&&i<u.length-1){b/=1024;i++;} return b.toFixed(i? 1:0)+' '+u[i]; }
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let resources = [];      // {name, file, ext, size, course, rawTag, accession, connectedAt}
+let currentFilter = 'all';
+let currentSort = 'recent';
+let dirHandle = null;
+
+/* ---------- IndexedDB for handle persistence ---------- */
+function idbOpen(){
+  return new Promise((res,rej)=>{
+    const req = indexedDB.open('reading-room', 1);
+    req.onupgradeneeded = ()=>{ req.result.createObjectStore('handles'); };
+    req.onsuccess = ()=>res(req.result);
+    req.onerror = ()=>rej(req.error);
+  });
+}
+async function idbSet(key,val){ try{ const db=await idbOpen(); return new Promise((res)=>{ const tx=db.transaction('handles','readwrite'); tx.objectStore('handles').put(val,key); tx.oncomplete=()=>res(); tx.onerror=()=>res(); }); }catch(e){} }
+async function idbGet(key){ try{ const db=await idbOpen(); return new Promise((res)=>{ const tx=db.transaction('handles','readonly'); const rq=tx.objectStore('handles').get(key); rq.onsuccess=()=>res(rq.result); rq.onerror=()=>res(null); }); }catch(e){ return null; } }
+
+const supportsFS = 'showDirectoryPicker' in window;
+
+async function connectFolder(){
+  if(supportsFS){
+    try{
+      const handle = await window.showDirectoryPicker();
+      dirHandle = handle;
+      await idbSet('lastDir', handle);
+      await scanHandle(handle);
+      showToast('Folder connected — resources filed.');
+    }catch(e){ if(e.name!=='AbortError') showToast('Could not open folder.'); }
+  } else {
+    document.getElementById('fallbackInput').click();
+  }
+}
+
+async function scanHandle(handle){
+  const items = [];
+  for await (const [name, entry] of handle.entries()){
+    if(entry.kind==='file' && /\.(pdf|docx?|pptx?|xlsx?|png|jpe?g|gif|txt|zip)$/i.test(name)){
+      const file = await entry.getFile();
+      items.push(buildRecord(name, file, entry));
+    }
+  }
+  resources = items;
+  document.getElementById('connectStatus').innerHTML = '<span class="dot"></span>'+resources.length+' file(s) connected';
+  document.getElementById('connectStatus').classList.add('ok');
+  document.getElementById('connectBtn').textContent = 'Reconnect / choose another folder';
+  document.getElementById('connectBtn').prepend(iconFolder());
+  renderAll();
+}
+
+function iconFolder(){
+  const span=document.createElement('span'); return span; // placeholder, kept simple
+}
+
+function buildRecord(name, file, handle){
+  const {course, rawTag} = matchCourse(name);
+  const ext = extOf(name);
+  return {
+    name, file, handle: handle||null, ext,
+    size: file.size, lastModified: file.lastModified,
+    course, rawTag,
+    accession: (course? course.code : normalizeToken(rawTag).slice(0,8)) + '·' + String(Math.abs(hashCode(name))).slice(0,3)
+  };
+}
+function hashCode(s){ let h=0; for(let i=0;i<s.length;i++){ h=(h<<5)-h+s.charCodeAt(i); h|=0; } return h; }
+
+document.getElementById('fallbackInput').addEventListener('change', (e)=>{
+  const files = Array.from(e.target.files||[]);
+  if(!files.length) return;
+  resources = files.map(f=> buildRecord(f.webkitRelativePath ? f.webkitRelativePath.split('/').pop() : f.name, f, null));
+  document.getElementById('connectStatus').innerHTML = '<span class="dot"></span>'+resources.length+' file(s) connected';
+  document.getElementById('connectStatus').classList.add('ok');
+  document.getElementById('connectBtn').textContent = 'Choose another folder';
+  showToast('Folder connected — resources filed.');
+  renderAll();
+});
+
+document.getElementById('connectBtn').addEventListener('click', connectFolder);
+
+// Try to offer reconnect to a previously granted directory (Chromium only)
+(async ()=>{
+  if(!supportsFS) return;
+  const saved = await idbGet('lastDir');
+  if(saved){
+    document.getElementById('reconnectBtn').style.display = 'inline-flex';
+    document.getElementById('reconnectBtn').addEventListener('click', async ()=>{
+      try{
+        const perm = await saved.requestPermission({mode:'read'});
+        if(perm==='granted'){ dirHandle=saved; await scanHandle(saved); showToast('Reconnected.'); }
+        else showToast('Permission denied.');
+      }catch(e){ showToast('That folder is no longer available — connect again.'); }
+    });
+  }
+})();
+
+/* ============================================================
+   RENDERING — hero stats, drawers, cards
+   ============================================================ */
+function renderHeroStats(){
+  const sem1 = courses.filter(c=>c.sem===1).reduce((s,c)=>s+c.credits,0);
+  const sem2 = courses.filter(c=>c.sem===2).reduce((s,c)=>s+c.credits,0);
+  const el = document.getElementById('heroStats');
+  el.innerHTML = `
+   <div class="s"><b>2</b><small>Semesters</small></div>
+   <div class="s"><b>${courses.length}</b><small>Courses</small></div>
+   <div class="s"><b>${(sem1+sem2).toFixed(1)}</b><small>Total credits</small></div>
+   <div class="s"><b id="resCountStat">0</b><small>Files filed</small></div>`;
+}
+
+function renderDrawers(){
+  const el = document.getElementById('drawers');
+  el.innerHTML = '';
+  const allItem = document.createElement('div');
+  allItem.className = 'drawer-item drawer-all'+(currentFilter==='all'?' active':'');
+  allItem.innerHTML = `<span>All resources</span><span class="cnt">${resources.length}</span>`;
+  allItem.addEventListener('click',()=>{ currentFilter='all'; renderAll(); });
+  el.appendChild(allItem);
+
+  [1,2].forEach(sem=>{
+    const cab = document.createElement('div');
+    cab.className = 'drawer-cab';
+    const head = document.createElement('div');
+    head.className = 'drawer-cab-head';
+    head.textContent = 'Semester '+sem;
+    cab.appendChild(head);
+    courses.filter(c=>c.sem===sem).forEach(c=>{
+      const cnt = resources.filter(r=>r.course && r.course.code===c.code).length;
+      const item = document.createElement('div');
+      item.className = 'drawer-item'+(currentFilter===c.code?' active':'');
+      item.innerHTML = `<span class="code">${c.code}</span><span class="cnt">${cnt}</span>`;
+      item.title = c.title;
+      item.addEventListener('click',()=>{ currentFilter=c.code; renderAll(); });
+      cab.appendChild(item);
+    });
+    el.appendChild(cab);
+  });
+
+  const uncategorized = resources.filter(r=>!r.course);
+  if(uncategorized.length){
+    const cab = document.createElement('div');
+    cab.className = 'drawer-cab';
+    cab.innerHTML = '<div class="drawer-cab-head">Unfiled</div>';
+    const item = document.createElement('div');
+    item.className = 'drawer-item'+(currentFilter==='__unfiled'?' active':'');
+    item.innerHTML = `<span>Doesn't match a course</span><span class="cnt">${uncategorized.length}</span>`;
+    item.addEventListener('click',()=>{ currentFilter='__unfiled'; renderAll(); });
+    cab.appendChild(item);
+    el.appendChild(cab);
+  }
+}
+
+function filteredResources(){
+  let list = resources;
+  if(currentFilter==='__unfiled') list = list.filter(r=>!r.course);
+  else if(currentFilter!=='all') list = list.filter(r=>r.course && r.course.code===currentFilter);
+  const q = document.getElementById('globalSearch').value.trim().toLowerCase();
+  if(q) list = list.filter(r=> r.name.toLowerCase().includes(q) || (r.course && (r.course.title.toLowerCase().includes(q)||r.course.code.toLowerCase().includes(q))));
+  list = list.slice();
+  if(currentSort==='name') list.sort((a,b)=>a.name.localeCompare(b.name));
+  else if(currentSort==='type') list.sort((a,b)=>a.ext.localeCompare(b.ext));
+  else list.sort((a,b)=>b.lastModified-a.lastModified);
+  return list;
+}
+
+function iconFor(ext){
+  if(ext==='pdf') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg>';
+  if(['png','jpg','jpeg','gif','webp'].includes(ext)) return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>';
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8M8 17h8"/></svg>';
+}
+
+function renderCards(){
+  const grid = document.getElementById('cardGrid');
+  const list = filteredResources();
+  document.getElementById('panelTitle').textContent = currentFilter==='all' ? 'All resources' : (currentFilter==='__unfiled' ? 'Unfiled resources' : (courseByKey[currentFilter.replace(/-/g,'')] ? currentFilter : currentFilter));
+  document.getElementById('panelSub').textContent = list.length + (list.length===1?' file':' files');
+  grid.innerHTML = '';
+  if(!resources.length){
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
+      <h4>The stacks are empty</h4>
+      <p>Connect the folder that holds your course PDFs and files — The Reading Room will file each one under its matching course automatically.</p>
+      <button class="btn primary" onclick="document.getElementById('connectBtn').click()">Connect resource folder</button>
+    </div>`;
+    return;
+  }
+  if(!list.length){
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><h4>No files here yet</h4><p>Nothing filed under this drawer or search yet.</p></div>`;
+    return;
+  }
+  list.forEach(r=>{
+    const card = document.createElement('div');
+    card.className = 'rescard';
+    card.style.setProperty('--tab', EXT_COLORS[r.ext] || '#5C5645');
+    card.innerHTML = `
+      <div class="corner"></div>
+      <div class="top"><span class="ext">${r.ext}</span><span class="acc">${r.accession}</span></div>
+      <h4>${escapeHtml(r.name.replace(/\.[^.]+$/,''))}</h4>
+      <div class="course">${r.course ? r.course.code+' · '+r.course.title : 'Unfiled · “'+escapeHtml(r.rawTag)+'”'}</div>
+      <div class="meta"><span>${fmtSize(r.size)}</span><span class="leader"></span><span>${new Date(r.lastModified).toLocaleDateString()}</span></div>
+      <div class="actions">
+        <button class="btn primary" data-act="open">${isPdf(r.name)?'Read':(isImage(r.name)?'View':'Open')}</button>
+        <button class="btn" data-act="dl">Download</button>
+      </div>`;
+    card.querySelector('[data-act="open"]').addEventListener('click',(e)=>{ e.stopPropagation(); openResource(r); });
+    card.querySelector('[data-act="dl"]').addEventListener('click',(e)=>{ e.stopPropagation(); downloadResource(r); });
+    card.addEventListener('click',()=>openResource(r));
+    grid.appendChild(card);
+  });
+}
+function escapeHtml(s){ return s.replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+function downloadResource(r){
+  const url = URL.createObjectURL(r.file);
+  const a = document.createElement('a'); a.href=url; a.download=r.name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url), 4000);
+}
+
+function openResource(r){
+  if(isPdf(r.name)) openReader(r);
+  else if(isImage(r.name)) openLightbox(r);
+  else downloadResource(r);
+}
+
+function renderAll(){
+  document.getElementById('resCountStat') && (document.getElementById('resCountStat').textContent = resources.length);
+  renderDrawers();
+  renderCards();
+}
+
+document.getElementById('globalSearch').addEventListener('input', ()=>{ renderCards(); renderCourseCatalog(document.getElementById('globalSearch').value.trim().toLowerCase()); });
+document.getElementById('sortbar').addEventListener('click',(e)=>{
+  const chip = e.target.closest('.chip'); if(!chip) return;
+  document.querySelectorAll('#sortbar .chip').forEach(c=>c.classList.remove('active'));
+  chip.classList.add('active'); currentSort = chip.dataset.sort; renderCards();
+});
+
+/* ============================================================
+   COURSE CATALOG SECTION
+   ============================================================ */
+function renderCourseCatalog(filterQ){
+  const el = document.getElementById('semesterBlocks');
+  el.innerHTML = '';
+  [1,2].forEach(sem=>{
+    const semCourses = courses.filter(c=>c.sem===sem).filter(c=> !filterQ || c.title.toLowerCase().includes(filterQ) || c.code.toLowerCase().includes(filterQ) || c.topics.some(t=>(t.g+' '+t.d).toLowerCase().includes(filterQ)));
+    if(filterQ && !semCourses.length) return;
+    const totalCr = courses.filter(c=>c.sem===sem).reduce((s,c)=>s+c.credits,0);
+    const block = document.createElement('div');
+    block.style.marginBottom = '30px';
+    block.innerHTML = `<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:14px;">
+        <span class="stamp">Semester ${sem}</span>
+        <span style="font-family:var(--mono);font-size:0.75rem;color:var(--ink-faint);">${totalCr} credits</span>
+      </div>
+      <div class="course-grid" id="semGrid${sem}"></div>`;
+    el.appendChild(block);
+    const grid = block.querySelector('.course-grid');
+    semCourses.forEach(c=>{
+      const cnt = resources.filter(r=>r.course && r.course.code===c.code).length;
+      const card = document.createElement('div');
+      card.className = 'course-card';
+      card.innerHTML = `
+        <div class="course-head">
+          <div class="l">
+            <div class="code">${c.code}${c.related?' · Lab for '+c.related:''}</div>
+            <h4>${c.title}</h4>
+            <div class="tags"><span class="tagpill">${c.type}</span><span class="tagpill">${cnt} file${cnt===1?'':'s'} filed</span></div>
+          </div>
+          <div class="cr">${c.credits}<small>credits</small></div>
+        </div>
+        <div class="course-body"><div class="course-body-in">${
+          c.topics.length ? c.topics.map(t=>`<div class="topic"><div class="g">${t.g}<span class="leader"></span></div>${t.d?`<div class="d">${t.d}</div>`:''}</div>`).join('')
+          : `<div class="topic"><div class="d">Lab component paired with ${c.related}. Filed resources for this drawer are practical sheets, lab manuals and reports.</div></div>`
+        }</div></div>`;
+      card.querySelector('.course-head').addEventListener('click',()=>card.classList.toggle('open'));
+      grid.appendChild(card);
+    });
+  });
+}
+
+/* ============================================================
+   CGPA + ATTENDANCE TOOLS
+   ============================================================ */
+const CGPA_KEY = 'reading_room_grades';
+let grades = JSON.parse(localStorage.getItem(CGPA_KEY) || '{}');
+function renderCgpaForm(){
+  const form = document.getElementById('cgpaForm');
+  form.innerHTML = '';
+  courses.forEach(c=>{
+    const row = document.createElement('div');
+    row.className = 'cgpa-row';
+    row.innerHTML = `<span class="cname">${c.code} <span style="color:var(--ink-faint)">(${c.credits}cr)</span></span>
+      <select data-code="${c.code}" data-credits="${c.credits}">
+        <option value="">Not graded</option>
+        ${gradeScale.map(g=>`<option value="${g.p}" ${grades[c.code]===g.p?'selected':''}>${g.l}</option>`).join('')}
+      </select>`;
+    row.querySelector('select').addEventListener('change',(e)=>{
+      if(e.target.value==='') delete grades[c.code]; else grades[c.code]=parseFloat(e.target.value);
+      localStorage.setItem(CGPA_KEY, JSON.stringify(grades));
+      computeCgpa();
+    });
+    form.appendChild(row);
+  });
+}
+function computeCgpa(){
+  let sumPC=0,sumC=0;
+  courses.forEach(c=>{ if(grades[c.code]!==undefined){ sumPC+=grades[c.code]*c.credits; sumC+=c.credits; } });
+  document.getElementById('cgpaVal').textContent = sumC? (sumPC/sumC).toFixed(2) : '—';
+}
+document.getElementById('resetCgpa').addEventListener('click',()=>{
+  grades = {}; localStorage.removeItem(CGPA_KEY);
+  document.querySelectorAll('#cgpaForm select').forEach(s=>s.value='');
+  computeCgpa();
+});
+
+document.getElementById('attCheck').addEventListener('click',()=>{
+  const val = parseFloat(document.getElementById('attInput').value);
+  const out = document.getElementById('attOut');
+  out.style.display='block';
+  if(isNaN(val)||val<0||val>100){ out.innerHTML='Enter a valid attendance percentage (0–100).'; return; }
+  let m5,m10,cls,txt;
+  if(val>=90){m5=5;m10=10;} else if(val>=85){m5=4;m10=8;} else if(val>=80){m5=3;m10=6;}
+  else if(val>=75){m5=2;m10=4;} else if(val>=60){m5=1;m10=2;} else {m5=0;m10=0;}
+  if(val>=75){cls='ok';txt='Eligible — free of fine';} else if(val>=60){cls='fine';txt='Eligible with a Tk. 500 fine';} else {cls='barred';txt='Barred from the semester final exam';}
+  out.innerHTML = `Attendance marks: <b>${m5}/5</b> or <b>${m10}/10</b><br><span class="status ${cls}">${txt}</span>`;
+});
+
+/* ============================================================
+   RULES ACCORDION
+   ============================================================ */
+function renderRules(){
+  const el = document.getElementById('accordion');
+  rules.forEach(r=>{
+    const item = document.createElement('div');
+    item.className = 'acc-item';
+    item.innerHTML = `<div class="acc-head">${r.t}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-body"><div class="acc-body-in">${r.b}</div></div>`;
+    item.querySelector('.acc-head').addEventListener('click',()=>item.classList.toggle('open'));
+    el.appendChild(item);
+  });
+}
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+/* ============================================================
+   IMAGE LIGHTBOX
+   ============================================================ */
+function openLightbox(r){
+  const url = URL.createObjectURL(r.file);
+  document.getElementById('lbImg').src = url;
+  document.getElementById('lbCap').textContent = r.name;
+  document.getElementById('lightbox').classList.add('open');
+}
+document.getElementById('lbClose').addEventListener('click', ()=>{
+  document.getElementById('lightbox').classList.remove('open');
+  document.getElementById('lbImg').src='';
+});
+document.getElementById('lightbox').addEventListener('click',(e)=>{ if(e.target.id==='lightbox') { document.getElementById('lightbox').classList.remove('open'); document.getElementById('lbImg').src=''; } });
+
+/* ============================================================
+   ADVANCED PDF READER (pdf.js)
+   ============================================================ */
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const Reader = {
+  doc:null, resource:null, scale:1.1, rotation:0, pageCount:0, currentPage:1,
+  pageEls:[], pageObserver:null, matches:[], matchIdx:-1, thumbsBuilt:false,
+};
+
+async function openReader(r){
+  Reader.resource = r;
+  const overlay = document.getElementById('reader');
+  overlay.classList.add('open');
+  document.getElementById('rTitle').textContent = r.name;
+  document.getElementById('rCanvasWrap').innerHTML = '<div class="reader-loading"><div class="spinner"></div>Opening document…</div>';
+  document.getElementById('rThumbs').innerHTML = '';
+  Reader.thumbsBuilt = false;
+  Reader.rotation = 0;
+  const url = URL.createObjectURL(r.file);
+  try{
+    const loadingTask = pdfjsLib.getDocument(url);
+    const doc = await loadingTask.promise;
+    Reader.doc = doc;
+    Reader.pageCount = doc.numPages;
+    document.getElementById('rPageTotal').textContent = doc.numPages;
+    const saved = JSON.parse(localStorage.getItem('rr_bookmarks')||'{}');
+    Reader.currentPage = saved[bookmarkKey(r)] || 1;
+    await renderAllPages();
+    scrollToPage(Reader.currentPage, true);
+  }catch(err){
+    document.getElementById('rCanvasWrap').innerHTML = '<div class="reader-loading">Could not open this PDF.<br><span style="opacity:.7;font-size:.75rem;">'+(err.message||'')+'</span></div>';
+  }
+}
+function bookmarkKey(r){ return r.name+'_'+r.size; }
+
+async function renderAllPages(){
+  const wrap = document.getElementById('rCanvasWrap');
+  wrap.innerHTML = '';
+  Reader.pageEls = [];
+  for(let n=1;n<=Reader.pageCount;n++){
+    const page = await Reader.doc.getPage(n);
+    const viewport = page.getViewport({scale:Reader.scale, rotation:Reader.rotation});
+    const shell = document.createElement('div');
+    shell.className = 'pdf-page-shell';
+    shell.dataset.page = n;
+    const canvas = document.createElement('canvas');
+    canvas.width = viewport.width; canvas.height = viewport.height;
+    const badge = document.createElement('div'); badge.className='page-badge'; badge.textContent = 'Page '+n;
+    shell.appendChild(canvas); shell.appendChild(badge);
+    wrap.appendChild(shell);
+    Reader.pageEls.push(shell);
+    const ctx = canvas.getContext('2d');
+    await page.render({canvasContext:ctx, viewport}).promise;
+  }
+  document.getElementById('rZoomLevel').textContent = Math.round(Reader.scale*100/1.1*100/100)+'%'; // baseline normalize below
+  updateZoomLabel();
+  setupScrollObserver();
+}
+function updateZoomLabel(){ document.getElementById('rZoomLevel').textContent = Math.round((Reader.scale/1.1)*100)+'%'; }
+
+function setupScrollObserver(){
+  if(Reader.pageObserver) Reader.pageObserver.disconnect();
+  Reader.pageObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(en=>{
+      if(en.isIntersecting && en.intersectionRatio>0.5){
+        const n = parseInt(en.target.dataset.page,10);
+        Reader.currentPage = n;
+        document.getElementById('rPageNum').value = n;
+        highlightThumb(n);
+      }
+    });
+  }, {root: document.getElementById('rCanvasWrap'), threshold:[0.5]});
+  Reader.pageEls.forEach(el=>Reader.pageObserver.observe(el));
+}
+
+function scrollToPage(n, instant){
+  const el = Reader.pageEls[n-1];
+  if(el) el.scrollIntoView({behavior: instant?'auto':'smooth', block:'start'});
+}
+
+document.getElementById('rPrev').addEventListener('click',()=> scrollToPage(Math.max(1,Reader.currentPage-1)));
+document.getElementById('rNext').addEventListener('click',()=> scrollToPage(Math.min(Reader.pageCount,Reader.currentPage+1)));
+document.getElementById('rPageNum').addEventListener('change',(e)=>{
+  let n = parseInt(e.target.value,10); if(isNaN(n)) n=1;
+  n = Math.max(1,Math.min(Reader.pageCount,n));
+  scrollToPage(n);
+});
+document.getElementById('rZoomIn').addEventListener('click', async ()=>{ Reader.scale=Math.min(3.2,Reader.scale+0.15); await renderAllPages(); scrollToPage(Reader.currentPage,true); });
+document.getElementById('rZoomOut').addEventListener('click', async ()=>{ Reader.scale=Math.max(0.4,Reader.scale-0.15); await renderAllPages(); scrollToPage(Reader.currentPage,true); });
+document.getElementById('rFitWidth').addEventListener('click', async ()=>{
+  const wrapWidth = document.getElementById('rCanvasWrap').clientWidth - 40;
+  const page = await Reader.doc.getPage(1);
+  const base = page.getViewport({scale:1});
+  Reader.scale = Math.max(0.4, Math.min(3.2, wrapWidth/base.width));
+  await renderAllPages(); scrollToPage(Reader.currentPage,true);
+});
+document.getElementById('rRotate').addEventListener('click', async ()=>{ Reader.rotation=(Reader.rotation+90)%360; await renderAllPages(); scrollToPage(Reader.currentPage,true); });
+
+function setTheme(t){
+  const overlay = document.getElementById('reader');
+  overlay.classList.remove('theme-dark','theme-sepia');
+  if(t!=='light') overlay.classList.add('theme-'+t);
+}
+document.getElementById('rThemeLight').addEventListener('click',()=>setTheme('light'));
+document.getElementById('rThemeSepia').addEventListener('click',()=>setTheme('sepia'));
+document.getElementById('rThemeDark').addEventListener('click',()=>setTheme('dark'));
+
+document.getElementById('rBookmark').addEventListener('click',()=>{
+  if(!Reader.resource) return;
+  const saved = JSON.parse(localStorage.getItem('rr_bookmarks')||'{}');
+  saved[bookmarkKey(Reader.resource)] = Reader.currentPage;
+  localStorage.setItem('rr_bookmarks', JSON.stringify(saved));
+  showToast('Bookmarked page '+Reader.currentPage);
+});
+document.getElementById('rFullscreen').addEventListener('click',()=>{
+  const overlay = document.getElementById('reader');
+  if(!document.fullscreenElement) overlay.requestFullscreen?.(); else document.exitFullscreen?.();
+});
+document.getElementById('rDownload').addEventListener('click',()=>{ if(Reader.resource) downloadResource(Reader.resource); });
+document.getElementById('rClose').addEventListener('click', closeReader);
+function closeReader(){
+  document.getElementById('reader').classList.remove('open');
+  if(Reader.pageObserver) Reader.pageObserver.disconnect();
+  Reader.doc = null;
+}
+document.addEventListener('keydown',(e)=>{
+  if(!document.getElementById('reader').classList.contains('open')) return;
+  if(e.target.tagName==='INPUT') { if(e.key==='Escape') e.target.blur(); return; }
+  if(e.key==='Escape') closeReader();
+  else if(e.key==='ArrowRight'||e.key==='PageDown') scrollToPage(Math.min(Reader.pageCount,Reader.currentPage+1));
+  else if(e.key==='ArrowLeft'||e.key==='PageUp') scrollToPage(Math.max(1,Reader.currentPage-1));
+  else if(e.key==='+'||e.key==='=') document.getElementById('rZoomIn').click();
+  else if(e.key==='-') document.getElementById('rZoomOut').click();
+  else if(e.key==='f') document.getElementById('rFullscreen').click();
+  else if(e.key==='/'){ e.preventDefault(); document.getElementById('rSearchInput').focus(); }
+});
+
+/* ---- thumbnails ---- */
+document.getElementById('rThumbToggle').addEventListener('click', async ()=>{
+  const panel = document.getElementById('rThumbs');
+  panel.classList.toggle('open');
+  if(panel.classList.contains('open') && !Reader.thumbsBuilt && Reader.doc){
+    Reader.thumbsBuilt = true;
+    panel.innerHTML = '';
+    for(let n=1;n<=Reader.pageCount;n++){
+      const page = await Reader.doc.getPage(n);
+      const vp = page.getViewport({scale:0.18});
+      const c = document.createElement('canvas'); c.width=vp.width; c.height=vp.height;
+      await page.render({canvasContext:c.getContext('2d'), viewport:vp}).promise;
+      const t = document.createElement('div'); t.className='thumb'; t.dataset.page=n;
+      t.appendChild(c);
+      const lab = document.createElement('div'); lab.className='n'; lab.textContent=n;
+      t.appendChild(lab);
+      t.addEventListener('click',()=>scrollToPage(n));
+      panel.appendChild(t);
+    }
+    highlightThumb(Reader.currentPage);
+  }
+});
+function highlightThumb(n){
+  document.querySelectorAll('.thumb').forEach(t=>t.classList.toggle('active', parseInt(t.dataset.page,10)===n));
+}
+
+/* ---- in-document search ---- */
+document.getElementById('rSearchInput').addEventListener('input', debounce(async (e)=>{
+  const q = e.target.value.trim();
+  document.querySelectorAll('.hl-span').forEach(s=>s.classList.remove('hl-span'));
+  Reader.matches = [];
+  Reader.matchIdx = -1;
+  document.getElementById('rSearchCnt').textContent='';
+  if(!q || !Reader.doc) return;
+  const ql = q.toLowerCase();
+  for(let n=1;n<=Reader.pageCount;n++){
+    const page = await Reader.doc.getPage(n);
+    const text = await page.getTextContent();
+    const str = text.items.map(i=>i.str).join(' ').toLowerCase();
+    if(str.includes(ql)) Reader.matches.push(n);
+  }
+  document.getElementById('rSearchCnt').textContent = Reader.matches.length ? '1 / '+Reader.matches.length+' pg' : 'No matches';
+  if(Reader.matches.length){ Reader.matchIdx=0; scrollToPage(Reader.matches[0]); }
+},400));
+document.getElementById('rSearchNext').addEventListener('click',()=>{
+  if(!Reader.matches.length) return;
+  Reader.matchIdx = (Reader.matchIdx+1)%Reader.matches.length;
+  scrollToPage(Reader.matches[Reader.matchIdx]);
+  document.getElementById('rSearchCnt').textContent = (Reader.matchIdx+1)+' / '+Reader.matches.length+' pg';
+});
+document.getElementById('rSearchPrev').addEventListener('click',()=>{
+  if(!Reader.matches.length) return;
+  Reader.matchIdx = (Reader.matchIdx-1+Reader.matches.length)%Reader.matches.length;
+  scrollToPage(Reader.matches[Reader.matchIdx]);
+  document.getElementById('rSearchCnt').textContent = (Reader.matchIdx+1)+' / '+Reader.matches.length+' pg';
+});
+function debounce(fn,ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; }
+
+/* ============================================================
+   INIT
+   ============================================================ */
+renderHeroStats();
+renderDrawers();
+renderCards();
+renderCourseCatalog('');
+renderCgpaForm(); computeCgpa();
+renderRules();
+</script>
+</body>
+</html>
