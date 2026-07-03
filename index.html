@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <style>
 :root{
   --paper:#F2EBD9;
@@ -158,6 +159,10 @@ section{padding:48px 0;border-bottom:1px solid var(--line);}
 .rescard .actions{display:flex;gap:6px;margin-top:12px;padding-left:8px;}
 .rescard .actions button{flex:1;font-size:0.72rem;padding:7px 8px;}
 .corner{position:absolute;top:0;right:0;width:0;height:0;border-style:solid;border-width:0 16px 16px 0;border-color:transparent var(--paper-deep) transparent transparent;}
+.rescard.missing{cursor:default;opacity:0.72;border-style:dashed;}
+.rescard.missing:hover{transform:none;background:var(--card);}
+.rescard .meta.missing-flag{color:var(--brick);font-size:0.72rem;line-height:1.4;}
+.rescard .actions button:disabled{opacity:0.4;cursor:not-allowed;}
 
 .empty-state{border:1.5px dashed var(--line-strong);border-radius:var(--r);padding:48px 24px;text-align:center;color:var(--ink-soft);}
 .empty-state svg{width:38px;height:38px;color:var(--brass);margin-bottom:12px;}
@@ -200,6 +205,17 @@ section{padding:48px 0;border-bottom:1px solid var(--line);}
 .status.ok{background:rgba(75,122,91,0.15);color:var(--green);}
 .status.fine{background:rgba(169,119,47,0.15);color:var(--brass);}
 .status.barred{background:rgba(160,64,43,0.15);color:var(--brick);}
+
+/* ---------- merge tool ---------- */
+.merge-row{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;}
+.merge-slot{display:flex;flex-direction:column;gap:6px;flex:1;min-width:180px;}
+.merge-slot label{font-family:var(--mono);font-size:0.68rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint);}
+.merge-slot select, .merge-slot input{padding:9px 10px;border-radius:3px;border:1px solid var(--line-strong);background:var(--paper);font-family:var(--body);font-size:0.86rem;color:var(--ink);width:100%;}
+.merge-status{margin-top:14px;font-size:0.84rem;min-height:1.2em;display:flex;align-items:center;gap:8px;}
+.merge-status.err{color:var(--brick);}
+.merge-status.ok{color:var(--green);}
+.merge-status .spinner{width:14px;height:14px;border-width:2px;border-color:rgba(38,34,26,0.18);border-top-color:var(--brass);}
+#mergeBtn:disabled{opacity:0.5;cursor:not-allowed;}
 
 /* ---------- rules accordion ---------- */
 .accordion .acc-item{border-bottom:1px solid var(--line);}
@@ -363,7 +379,7 @@ mark{background:var(--brass-soft);color:var(--navy-deep);border-radius:2px;paddi
 <section id="tools">
   <div class="wrap">
     <div class="sec-head">
-      <div><span class="tag">03 — The Ledger</span><h2>Quick Tools</h2><p>Estimate your CGPA and check exam eligibility from attendance — figures stay on this device.</p></div>
+      <div><span class="tag">03 — The Ledger</span><h2>Quick Tools</h2><p>Estimate your CGPA, check exam eligibility from attendance, and combine two PDFs into one — figures and files stay on this device.</p></div>
     </div>
     <div class="tool-grid">
       <div class="tool-card">
@@ -389,6 +405,34 @@ mark{background:var(--brass-soft);color:var(--navy-deep);border-radius:2px;paddi
             <tr><td style="padding:3px 0;">&lt; 60%</td><td>Barred from final exam</td></tr>
           </table>
         </div>
+      </div>
+      <div class="tool-card" id="mergeCard" style="grid-column:1/-1;">
+        <h3>Merge PDFs</h3>
+        <div class="hint">Pick two PDFs from your filed resources — they're combined into one file, first then second, and downloaded straight to your device. Nothing is uploaded anywhere.</div>
+        <div class="merge-row">
+          <div class="merge-slot">
+            <label>First file</label>
+            <select id="mergeA"><option value="">— choose a PDF —</option></select>
+          </div>
+          <button class="rbtn" id="mergeSwap" type="button" title="Swap order" aria-label="Swap order" style="color:var(--ink);border-color:var(--line-strong);align-self:flex-end;margin-bottom:2px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3l4 4-4 4M21 7H9M7 21l-4-4 4-4M3 17h12"/></svg>
+          </button>
+          <div class="merge-slot">
+            <label>Second file</label>
+            <select id="mergeB"><option value="">— choose a PDF —</option></select>
+          </div>
+        </div>
+        <div class="merge-row" style="margin-top:12px;">
+          <div class="merge-slot" style="flex:1;">
+            <label>Output filename</label>
+            <input type="text" id="mergeFilename" placeholder="merged.pdf">
+          </div>
+          <button class="btn primary" id="mergeBtn" disabled style="align-self:flex-end;margin-bottom:1px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+            Merge &amp; download
+          </button>
+        </div>
+        <div class="merge-status" id="mergeStatus"></div>
       </div>
     </div>
   </div>
@@ -736,12 +780,12 @@ function hashCode(s){ let h=0; for(let i=0;i<s.length;i++){ h=(h<<5)-h+s.charCod
 async function probeFile(rec){
   try{
     const res = await fetch(rec.url, {method:'HEAD'});
-    if(!res.ok) return rec;
+    if(!res.ok){ rec.missing = (res.status===404); return rec; }
     const len = res.headers.get('content-length');
     const mod = res.headers.get('last-modified');
     if(len) rec.size = parseInt(len,10);
     if(mod) rec.lastModified = new Date(mod).getTime();
-  }catch(e){ /* server may not support HEAD — ignore */ }
+  }catch(e){ /* server may not support HEAD — leave rec as-is, don't flag missing on a network blip */ }
   return rec;
 }
 
@@ -752,7 +796,9 @@ async function loadManifest(isRefresh){
   try{
     const res = await fetch(MANIFEST_URL, {cache:'no-store'});
     if(!res.ok) throw new Error('manifest.json not found (HTTP '+res.status+')');
-    const list = await res.json();
+    let list;
+    try{ list = await res.json(); }
+    catch(parseErr){ throw new Error('invalid_json'); }
     const names = list.map(item => typeof item==='string' ? item : item.name).filter(Boolean);
     const records = names.map(n => buildRecord(n));
     await Promise.all(records.map(probeFile));
@@ -764,12 +810,16 @@ async function loadManifest(isRefresh){
     resources = [];
     statusEl.className = 'connect-status';
     const isFileProtocol = location.protocol === 'file:';
+    const isBadJson = err.message === 'invalid_json';
     statusEl.innerHTML = '<span class="dot"></span>' + (isFileProtocol
       ? 'Open this via a local server, not double-clicked'
+      : isBadJson ? 'manifest.json has invalid JSON'
       : 'No manifest found yet');
     if(isRefresh) showToast(isFileProtocol
       ? "Browsers block file:// reads — serve this folder locally (see README.txt) or host it online."
-      : "Couldn't read resources/manifest.json — see \u201cHow to add resources\u201d.");
+      : isBadJson
+        ? "resources/manifest.json isn't valid JSON — check for a missing comma or bracket."
+        : "Couldn't read resources/manifest.json — see \u201cHow to add resources\u201d.");
   }
   renderAll();
 }
@@ -858,7 +908,8 @@ function iconFor(ext){
 function renderCards(){
   const grid = document.getElementById('cardGrid');
   const list = filteredResources();
-  document.getElementById('panelTitle').textContent = currentFilter==='all' ? 'All resources' : (currentFilter==='__unfiled' ? 'Unfiled resources' : (courseByKey[currentFilter.replace(/-/g,'')] ? currentFilter : currentFilter));
+  const activeCourse = (currentFilter!=='all' && currentFilter!=='__unfiled') ? courses.find(c=>c.code===currentFilter) : null;
+  document.getElementById('panelTitle').textContent = currentFilter==='all' ? 'All resources' : (currentFilter==='__unfiled' ? 'Unfiled resources' : (activeCourse ? activeCourse.code+' · '+activeCourse.title : currentFilter));
   document.getElementById('panelSub').textContent = list.length + (list.length===1?' file':' files');
   grid.innerHTML = '';
   if(!resources.length){
@@ -882,27 +933,36 @@ function renderCards(){
     const savedEntry = isPdf(r.name) ? bookmarks[bookmarkKey(r)] : null;
     const savedPage = savedEntry && typeof savedEntry === 'object' ? savedEntry.page : null;
     const pct = savedEntry && savedEntry.total ? Math.min(100, Math.round(savedEntry.page/savedEntry.total*100)) : null;
+    if(r.missing) card.classList.add('missing');
     card.innerHTML = `
       <div class="corner"></div>
       <div class="top"><span class="ext">${r.ext}</span><span class="acc">${r.accession}</span></div>
       <h4>${escapeHtml(r.name.replace(/\.[^.]+$/,''))}</h4>
       <div class="course">${r.course ? r.course.code+' · '+r.course.title : 'Unfiled · “'+escapeHtml(r.rawTag)+'”'}</div>
-      <div class="meta"><span>${fmtSize(r.size)}</span><span class="leader"></span><span>${new Date(r.lastModified).toLocaleDateString()}</span></div>
+      ${r.missing
+        ? `<div class="meta missing-flag">Listed in manifest.json but not found in /resources</div>`
+        : `<div class="meta"><span>${fmtSize(r.size)}</span><span class="leader"></span><span>${new Date(r.lastModified).toLocaleDateString()}</span></div>`}
       ${savedPage ? `<div class="progress"><div class="bar"><i style="width:${pct!==null?pct:0}%"></i></div><span>p.${savedPage}${savedEntry.total?'/'+savedEntry.total:''}</span></div>` : ''}
       <div class="actions">
-        <button class="btn primary" data-act="open">${savedPage ? 'Continue' : (isPdf(r.name)?'Read':(isImage(r.name)?'View':'Open'))}</button>
-        <button class="btn" data-act="dl">Download</button>
+        <button class="btn primary" data-act="open" ${r.missing?'disabled':''}>${savedPage ? 'Continue' : (isPdf(r.name)?'Read':(isImage(r.name)?'View':'Open'))}</button>
+        <button class="btn" data-act="dl" ${r.missing?'disabled':''}>Download</button>
       </div>`;
-    card.querySelector('[data-act="open"]').addEventListener('click',(e)=>{ e.stopPropagation(); openResource(r); });
-    card.querySelector('[data-act="dl"]').addEventListener('click',(e)=>{ e.stopPropagation(); downloadResource(r); });
-    card.addEventListener('click',()=>openResource(r));
+    if(!r.missing){
+      card.querySelector('[data-act="open"]').addEventListener('click',(e)=>{ e.stopPropagation(); openResource(r); });
+      card.querySelector('[data-act="dl"]').addEventListener('click',(e)=>{ e.stopPropagation(); downloadResource(r); });
+      card.addEventListener('click',()=>openResource(r));
+    }
     grid.appendChild(card);
   });
 }
 function escapeHtml(s){ return s.replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
 function downloadResource(r){
-  const a = document.createElement('a'); a.href=r.url; a.download=r.name; a.click();
+  const a = document.createElement('a');
+  a.href = r.url; a.download = r.name; a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
 function openResource(r){
@@ -915,6 +975,7 @@ function renderAll(){
   document.getElementById('resCountStat') && (document.getElementById('resCountStat').textContent = resources.length);
   renderDrawers();
   renderCards();
+  populateMergeSelects();
 }
 
 document.getElementById('globalSearch').addEventListener('input', ()=>{ renderCards(); renderCourseCatalog(document.getElementById('globalSearch').value.trim().toLowerCase()); });
@@ -923,6 +984,112 @@ document.getElementById('sortbar').addEventListener('click',(e)=>{
   document.querySelectorAll('#sortbar .chip').forEach(c=>c.classList.remove('active'));
   chip.classList.add('active'); currentSort = chip.dataset.sort; renderCards();
 });
+
+/* ============================================================
+   MERGE PDFS
+   Combines two filed PDFs into one, client-side, using pdf-lib.
+   Nothing leaves the browser — both source files and the merged
+   output stay on this device.
+   ============================================================ */
+function populateMergeSelects(){
+  const selA = document.getElementById('mergeA');
+  const selB = document.getElementById('mergeB');
+  if(!selA || !selB) return;
+  const prevA = selA.value, prevB = selB.value;
+  const pdfList = resources.filter(r => isPdf(r.name) && !r.missing).slice().sort((a,b)=>a.name.localeCompare(b.name));
+  const optionsHtml = '<option value="">— choose a PDF —</option>' + pdfList.map(r =>
+    `<option value="${escapeHtml(r.name)}">${escapeHtml(r.name)}${r.course ? ' · '+r.course.code : ''}</option>`
+  ).join('');
+  selA.innerHTML = optionsHtml;
+  selB.innerHTML = optionsHtml;
+  // Preserve prior selections across a refresh if the same files are still filed
+  if(pdfList.some(r=>r.name===prevA)) selA.value = prevA;
+  if(pdfList.some(r=>r.name===prevB)) selB.value = prevB;
+  const mergeBtn = document.getElementById('mergeBtn');
+  if(mergeBtn) mergeBtn.disabled = pdfList.length < 2;
+  const statusEl = document.getElementById('mergeStatus');
+  if(statusEl && pdfList.length < 2 && !statusEl.dataset.busy){
+    statusEl.className = 'merge-status';
+    statusEl.textContent = pdfList.length===0 ? 'File at least two PDFs to enable merging.' : 'File one more PDF to enable merging.';
+  } else if(statusEl && !statusEl.dataset.busy){
+    statusEl.className = 'merge-status';
+    statusEl.textContent = '';
+  }
+}
+
+document.getElementById('mergeSwap').addEventListener('click', ()=>{
+  const selA = document.getElementById('mergeA'), selB = document.getElementById('mergeB');
+  const tmp = selA.value; selA.value = selB.value; selB.value = tmp;
+});
+
+function setMergeStatus(msg, kind, busy){
+  const el = document.getElementById('mergeStatus');
+  el.className = 'merge-status' + (kind ? ' '+kind : '');
+  el.dataset.busy = busy ? '1' : '';
+  el.innerHTML = busy ? '<div class="spinner"></div>'+escapeHtml(msg) : escapeHtml(msg);
+}
+
+document.getElementById('mergeBtn').addEventListener('click', async ()=>{
+  const nameA = document.getElementById('mergeA').value;
+  const nameB = document.getElementById('mergeB').value;
+  const mergeBtn = document.getElementById('mergeBtn');
+
+  if(!nameA || !nameB){ setMergeStatus('Choose two PDFs first.', 'err', false); return; }
+  if(nameA === nameB){ setMergeStatus('Choose two different files.', 'err', false); return; }
+  const recA = resources.find(r=>r.name===nameA);
+  const recB = resources.find(r=>r.name===nameB);
+  if(!recA || !recB){ setMergeStatus('One of those files is no longer filed — refresh the library.', 'err', false); return; }
+
+  mergeBtn.disabled = true;
+  try{
+    setMergeStatus('Reading '+recA.name+'…', null, true);
+    const bytesA = await fetchArrayBuffer(recA.url);
+    setMergeStatus('Reading '+recB.name+'…', null, true);
+    const bytesB = await fetchArrayBuffer(recB.url);
+
+    setMergeStatus('Merging pages…', null, true);
+    const [docA, docB] = await Promise.all([
+      PDFLib.PDFDocument.load(bytesA, {ignoreEncryption:true}),
+      PDFLib.PDFDocument.load(bytesB, {ignoreEncryption:true})
+    ]);
+    const merged = await PDFLib.PDFDocument.create();
+    const pagesA = await merged.copyPages(docA, docA.getPageIndices());
+    pagesA.forEach(p=>merged.addPage(p));
+    const pagesB = await merged.copyPages(docB, docB.getPageIndices());
+    pagesB.forEach(p=>merged.addPage(p));
+
+    setMergeStatus('Preparing download…', null, true);
+    const mergedBytes = await merged.save();
+    const blob = new Blob([mergedBytes], {type:'application/pdf'});
+    const blobUrl = URL.createObjectURL(blob);
+
+    let filename = document.getElementById('mergeFilename').value.trim();
+    if(!filename) filename = stripExt(recA.name)+'__'+stripExt(recB.name)+'-merged.pdf';
+    if(!/\.pdf$/i.test(filename)) filename += '.pdf';
+
+    const a = document.createElement('a');
+    a.href = blobUrl; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(blobUrl), 4000);
+
+    const totalPages = pagesA.length + pagesB.length;
+    setMergeStatus('Merged '+totalPages+' pages into '+filename+' — check your downloads.', 'ok', false);
+    showToast('Merged PDF downloaded.');
+  }catch(err){
+    console.error('Merge failed:', err);
+    const msg = /encrypt/i.test(err.message||'') ? 'One of these PDFs is password-protected and can\'t be merged.' : "Couldn't merge those files — one may be corrupted or not a real PDF.";
+    setMergeStatus(msg, 'err', false);
+  }finally{
+    mergeBtn.disabled = resources.filter(r=>isPdf(r.name) && !r.missing).length < 2;
+  }
+});
+
+async function fetchArrayBuffer(url){
+  const res = await fetch(url);
+  if(!res.ok) throw new Error('Could not fetch '+url+' (HTTP '+res.status+')');
+  return await res.arrayBuffer();
+}
+function stripExt(name){ return name.replace(/\.[^.]+$/,''); }
 
 /* ============================================================
    COURSE CATALOG SECTION
@@ -1064,16 +1231,26 @@ const Reader = {
 
 async function openReader(r){
   Reader.resource = r;
+  Reader.openToken = (Reader.openToken||0) + 1;
+  const openToken = Reader.openToken;
   const overlay = document.getElementById('reader');
   overlay.classList.add('open');
   document.getElementById('rTitle').textContent = r.name;
   document.getElementById('rCanvasWrap').innerHTML = '<div class="reader-loading"><div class="spinner"></div>Opening document…</div>';
   document.getElementById('rThumbs').innerHTML = '';
+  document.getElementById('rThumbs').classList.remove('open');
+  // Reset state left over from whichever document was open before this one.
+  document.getElementById('rSearchInput').value = '';
+  document.getElementById('rSearchCnt').textContent = '';
+  Reader.matches = []; Reader.matchIdx = -1;
   Reader.thumbsBuilt = false;
   Reader.rotation = 0;
+  if(Reader.doc){ try{ Reader.doc.destroy(); }catch(e){} }
+  Reader.doc = null;
   try{
     const loadingTask = pdfjsLib.getDocument({url: r.url, disableAutoFetch:false, disableStream:false});
     const doc = await loadingTask.promise;
+    if(openToken !== Reader.openToken){ doc.destroy(); return; } // a newer openReader() call superseded this one
     Reader.doc = doc;
     Reader.pageCount = doc.numPages;
     document.getElementById('rPageTotal').textContent = doc.numPages;
@@ -1081,8 +1258,10 @@ async function openReader(r){
     const savedEntry = saved[bookmarkKey(r)];
     Reader.currentPage = (savedEntry && savedEntry.page) ? Math.min(savedEntry.page, doc.numPages) : 1;
     await renderAllPages();
+    if(openToken !== Reader.openToken) return;
     scrollToPage(Reader.currentPage, true);
   }catch(err){
+    if(openToken !== Reader.openToken) return;
     document.getElementById('rCanvasWrap').innerHTML = '<div class="reader-loading">Could not open this PDF.<br><span style="opacity:.7;font-size:.75rem;">'+(err.message||'')+'</span></div>';
   }
 }
@@ -1160,16 +1339,17 @@ document.getElementById('rPageNum').addEventListener('change',(e)=>{
   n = Math.max(1,Math.min(Reader.pageCount,n));
   scrollToPage(n);
 });
-document.getElementById('rZoomIn').addEventListener('click', async ()=>{ Reader.scale=Math.min(3.2,Reader.scale+0.15); await renderAllPages(); scrollToPage(Reader.currentPage,true); });
-document.getElementById('rZoomOut').addEventListener('click', async ()=>{ Reader.scale=Math.max(0.4,Reader.scale-0.15); await renderAllPages(); scrollToPage(Reader.currentPage,true); });
+document.getElementById('rZoomIn').addEventListener('click', async ()=>{ if(!Reader.doc) return; Reader.scale=Math.min(3.2,Reader.scale+0.15); await renderAllPages(); scrollToPage(Reader.currentPage,true); });
+document.getElementById('rZoomOut').addEventListener('click', async ()=>{ if(!Reader.doc) return; Reader.scale=Math.max(0.4,Reader.scale-0.15); await renderAllPages(); scrollToPage(Reader.currentPage,true); });
 document.getElementById('rFitWidth').addEventListener('click', async ()=>{
+  if(!Reader.doc) return;
   const wrapWidth = document.getElementById('rCanvasWrap').clientWidth - 40;
   const page = await Reader.doc.getPage(1);
   const base = page.getViewport({scale:1});
   Reader.scale = Math.max(0.4, Math.min(3.2, wrapWidth/base.width));
   await renderAllPages(); scrollToPage(Reader.currentPage,true);
 });
-document.getElementById('rRotate').addEventListener('click', async ()=>{ Reader.rotation=(Reader.rotation+90)%360; await renderAllPages(); scrollToPage(Reader.currentPage,true); });
+document.getElementById('rRotate').addEventListener('click', async ()=>{ if(!Reader.doc) return; Reader.rotation=(Reader.rotation+90)%360; await renderAllPages(); scrollToPage(Reader.currentPage,true); });
 
 function setTheme(t){
   const overlay = document.getElementById('reader');
@@ -1181,7 +1361,7 @@ document.getElementById('rThemeSepia').addEventListener('click',()=>setTheme('se
 document.getElementById('rThemeDark').addEventListener('click',()=>setTheme('dark'));
 
 document.getElementById('rBookmark').addEventListener('click',()=>{
-  if(!Reader.resource) return;
+  if(!Reader.resource || !Reader.doc) return;
   const saved = JSON.parse(localStorage.getItem('rr_bookmarks')||'{}');
   saved[bookmarkKey(Reader.resource)] = {page:Reader.currentPage, total:Reader.pageCount};
   localStorage.setItem('rr_bookmarks', JSON.stringify(saved));
@@ -1196,7 +1376,9 @@ document.getElementById('rClose').addEventListener('click', closeReader);
 function closeReader(){
   document.getElementById('reader').classList.remove('open');
   if(Reader.pageObserver) Reader.pageObserver.disconnect();
+  if(Reader.doc){ try{ Reader.doc.destroy(); }catch(e){} }
   Reader.doc = null;
+  Reader.openToken = (Reader.openToken||0) + 1; // invalidate any in-flight open
 }
 document.addEventListener('keydown',(e)=>{
   if(!document.getElementById('reader').classList.contains('open')) return;
